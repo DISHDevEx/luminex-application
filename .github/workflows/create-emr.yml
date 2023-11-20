@@ -44,9 +44,9 @@ jobs:
 
     - name: Create EMR cluster
       run: |
-          aws emr create-cluster --name "${{ github.event.inputs.cluster-name }}" \
-          --release-label "${{ github.event.inputs.release-label }}" \
+          aws emr create-cluster --name "${{ github.event.client_payload.inputs.cluster-name }}" \
+          --release-label "${{ github.event.client_payload.inputs.release-label }}" \
           --use-default-roles \
-          --ec2-attributes SubnetId="${{ github.event.inputs.subnet-id }}",KeyName="${{ github.event.inputs.key-name }}" \
+          --ec2-attributes SubnetId="${{ github.event.client_payload.inputs.subnet-id }}",KeyName="${{ github.event.client_payload.inputs.key-name }}" \
           --applications Name=Hadoop Name=Spark \
-          --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType="${{ github.event.inputs.instance-type }}" InstanceGroupType=CORE,InstanceCount=2,InstanceType="${{ github.event.inputs.instance-type }}"
+          --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType="${{ github.event.client_payload.inputs.instance-type }}" InstanceGroupType=CORE,InstanceCount=2,InstanceType="${{ github.event.client_payload.inputs.instance-type }}"
