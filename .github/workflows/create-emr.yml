@@ -1,6 +1,7 @@
 name: Deploy EMR Cluster
 on:
   repository_dispatch:  # Add this block for manual triggering
+    types: [create-emr]
     inputs:
       cluster-name:
         description: 'Name of the EMR cluster'
