@@ -130,7 +130,7 @@ Parameters:
     Type: String
     Description: Market type of the Amazon EC2 instances used to create a core cluster node.
     Default: ON_DEMAND
-  EMRMasterInstanceGrouprName:
+  EMRMasterInstanceGroupName:
     Type: String
     Description: Friendly name given to the master instance group.
     Default: "cfnMaster"
@@ -440,7 +440,7 @@ Resources:
           InstanceCount: !Ref EMRMasterInstanceGroupInstanceCount
           InstanceType: !Ref EMRMasterInstanceGroupInstanceType
           Market: !Ref EMRMasterInstanceGroupMarket
-          Name: !Ref EMRMasterInstanceGrouprName
+          Name: !Ref EMRMasterInstanceGroupName
           EbsConfiguration:
             EbsBlockDeviceConfigs:
               - VolumeSpecification:
