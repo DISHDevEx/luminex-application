@@ -1,0 +1,171 @@
+[
+    {
+      "ParameterKey": "EMRApplications",
+      "ParameterValue": "Hadoop,Hive,Livy,Spark,TensorFlow,Trino,ZooKeeper,JupyterEnterpriseGateway"
+    },
+    {
+      "ParameterKey": "EMRReleaseLabel",
+      "ParameterValue": "emr-6.12.0"
+    },
+    {
+      "ParameterKey": "EMRSubnetId",
+      "ParameterValue": "subnet-0afabb1a17a1ca011"
+    },
+    {
+      "ParameterKey": "EMRTerminationProtected",
+      "ParameterValue": "false"
+    },
+    {
+      "ParameterKey": "EMRClusterName",
+      "ParameterValue": "luminex-emr-cft"
+    },
+    {
+      "ParameterKey": "EMRClusterConfiguration",
+      "ParameterValue": "instance_group"
+    },
+    {
+      "ParameterKey": "EMRTagKey1",
+      "ParameterValue": "for-use-with-amazon-emr-managed-policies"
+    },
+    {
+      "ParameterKey": "EMRTagValue1",
+      "ParameterValue": "true"
+    },
+    {
+      "ParameterKey": "EMRTagKey2",
+      "ParameterValue": "EMRTagKey2"
+    },
+    {
+      "ParameterKey": "EMRTagValue2",
+      "ParameterValue": "EMRTagValue2"
+    },
+    {
+      "ParameterKey": "EMRTagKey3",
+      "ParameterValue": "EMRTagKey3"
+    },
+    {
+      "ParameterKey": "EMRTagValue3",
+      "ParameterValue": "EMRTagValue3"
+    },
+    {
+      "ParameterKey": "EMRVisibleToAllUsers",
+      "ParameterValue": "true"
+    },
+    {
+      "ParameterKey": "EMRStepConcurrencyLevel",
+      "ParameterValue": "1"
+    },
+    {
+      "ParameterKey": "EMRSecurityConfiguration",
+      "ParameterValue": ""
+    },
+    {
+      "ParameterKey": "EMRIdealTimeOut",
+      "ParameterValue": "1800"
+    },
+    {
+      "ParameterKey": "EMRBootstrapActionsName",
+      "ParameterValue": "Bootstrap"
+    },
+    {
+      "ParameterKey": "EMRBootstrapActionsScriptS3Path",
+      "ParameterValue": "s3://luminex-s3-test/bootstrap/luminex-bootstrap.sh"
+    },
+    {
+      "ParameterKey": "EMRConfigurationsScriptS3Path",
+      "ParameterValue": "s3://luminex-s3-test/configurations/luminex-configurations.yaml"
+    },
+    {
+      "ParameterKey": "EMREbsRootVolumeSize",
+      "ParameterValue": "64"
+    },
+    {
+      "ParameterKey": "EMRCoreInstanceGroupName",
+      "ParameterValue": "cfnCore"
+    },
+    {
+      "ParameterKey": "EMRCoreInstanceGroupInstanceCount",
+      "ParameterValue": "1"
+    },
+    {
+      "ParameterKey": "EMRCoreInstanceGroupInstanceType",
+      "ParameterValue": "m5.xlarge"
+    },
+    {
+      "ParameterKey": "EMRCoreInstanceGroupMarket",
+      "ParameterValue": "ON_DEMAND"
+    },
+    {
+      "ParameterKey": "EMRMasterInstanceGroupName",
+      "ParameterValue": "cfnMaster"
+    },
+    {
+      "ParameterKey": "EMRMasterInstanceGroupInstanceCount",
+      "ParameterValue": "1"
+    },
+    {
+      "ParameterKey": "EMRMasterInstanceGroupInstanceType",
+      "ParameterValue": "m5.xlarge"
+    },
+    {
+      "ParameterKey": "EMRMasterInstanceGroupMarket",
+      "ParameterValue": "ON_DEMAND"
+    },
+    {
+      "ParameterKey": "EMRTaskInstanceGroupName",
+      "ParameterValue": "cfnTask"
+    },
+    {
+      "ParameterKey": "EMRTaskInstanceGroupInstanceCount",
+      "ParameterValue": "1"
+    },
+    {
+      "ParameterKey": "EMRTaskInstanceGroupInstanceType",
+      "ParameterValue": "m5.xlarge"
+    },
+    {
+      "ParameterKey": "EMRTaskInstanceGroupMarket",
+      "ParameterValue": "ON_DEMAND"
+    },
+    {
+      "ParameterKey": "EMRAutoScalingRole",
+      "ParameterValue": "EMR_AutoScaling_DefaultRole"
+    },
+    {
+      "ParameterKey": "EMRMaximumCapacityUnits",
+      "ParameterValue": "4"
+    },
+    {
+      "ParameterKey": "EMRMaximumCoreCapacityUnits",
+      "ParameterValue": "4"
+    },
+    {
+      "ParameterKey": "EMRMaximumOnDemandCapacityUnits",
+      "ParameterValue": "4"
+    },
+    {
+      "ParameterKey": "EMRMinimumCapacityUnits",
+      "ParameterValue": "1"
+    },
+    {
+      "ParameterKey": "EMRUnitType",
+      "ParameterValue": "Instances"
+    },
+    {
+      "ParameterKey": "SagemakerStudioSecurityGroupId",
+      "ParameterValue": "sg-09141b3415e566e1a"
+    },
+    {
+      "ParameterKey": "SagemakerStudioSubnetId",
+      "ParameterValue": "subnet-0afabb1a17a1ca011"
+    },
+    {
+      "ParameterKey": "SageMakerProjectId",
+      "ParameterValue": "projectid"
+    },
+    {
+      "ParameterKey": "SageMakerProjectName",
+      "ParameterValue": "projectname"
+    }
+  ]
+  
