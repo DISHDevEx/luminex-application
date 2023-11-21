@@ -539,5 +539,5 @@ Outputs:
   EMRClusterIdOutput:
     Description: "EMR Cluster ID"
     Value: !Sub |
-      aws emr describe-cluster --cluster-id ${EMRClusterWithInstanceGroup} --query 'Cluster.Id' --output text
+      ${EMRClusterWithInstanceGroup}
     Condition: ShouldUseInstanceGroup
