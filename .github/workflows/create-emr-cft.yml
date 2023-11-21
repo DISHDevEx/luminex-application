@@ -1,0 +1,71 @@
+name: Deploy EMR Cluster using CFT template
+
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+    types: [create-emr-cft]
+
+    inputs:
+      stack-name:
+        description: 'Name of stack'
+        required: true
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout files
+        run: |
+          ls -l
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
+      
+
+     
+
+      - name: Deploy EMR cluster
+        run: |
+          stack_id=$(aws cloudformation create-stack \
+            --stack-name ${{ github.event.client_payload.inputs.stack-name }} \
+            --template-body file://./infrastructure/create-emr-cft.yml \
+            --parameters file://./infrastructure/config_parameter.json \
+            --role-arn arn:aws:iam::355648722862:role/dish-dp-CICDAcctCodePipelineCloudFormationRole\
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            | jq -r '.StackId')
+          echo "CloudFormation stack ID: $stack_id"
+
+      - name: Wait for stack creation completion
+        run: |
+          aws cloudformation wait stack-create-complete --stack-name ${{ github.event.client_payload.inputs.stack-name }}
+      #     emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterId").OutputValue')
+      #     echo "EMR Cluster ID: $emr_cluster_id"
+
+
+      # - name: Get EMR Cluster Name
+      #   run: |
+      #     # Get the EMR cluster name from the stack outputs, if it exists
+      #         emr_cluster_name=$(aws cloudformation describe-stacks --region us-east-1 --stack-name testing-cft-template-parameterupdatedx | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterName") | .OutputValue // empty')
+        
+      #         if [ "$emr_cluster_name" = "null" ]; then
+      #           echo "EMR Cluster Name not found in stack outputs."
+      #         else
+      #           echo "EMR Cluster Name: $emr_cluster_name"
+      #         fi
+
+
+
+      # # - name: Output stack ID
+      #     run: |
+      #     echo "Stack ID: $stack_id"
