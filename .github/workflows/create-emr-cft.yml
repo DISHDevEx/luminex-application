@@ -1,9 +1,9 @@
 name: Deploy EMR Cluster using CFT template
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 #    types: [create-emr-cft]
 
