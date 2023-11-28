@@ -50,18 +50,17 @@ jobs:
         run: |
           aws cloudformation wait stack-create-complete --stack-name ${{ github.event.client_payload.inputs.stack-name }}
 
-      - name: Get Cluster ID from CloudFormation Stack
+      - name: Extract EMR Cluster ID
+        id: extract-cluster-id
         run: |
-          CLUSTER_ID=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx --query "Stacks[0].Outputs[?OutputKey=='ClusterID'].OutputValue" --output text)
-          echo "Cluster ID: $CLUSTER_ID"
-        env:
-          CLUSTER_ID: ${{ steps.set-cluster-id.outputs.cluster-id }}
+          emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx \
+            | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterIdOutput") | .OutputValue')
+          echo "EMR Cluster ID: $emr_cluster_id"
+        shell: bash
 
-      - name: Set Cluster ID as Secret
-        run: echo "CLUSTER_ID=${{ env.CLUSTER_ID }}" >> $GITHUB_ENV
-
-      - name: Save Cluster ID as Secret
-        run: echo "::set-secret name=CLUSTER_ID::${{ env.CLUSTER_ID }}"
+      - name: Set outputs
+        id: set-outputs
+        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}"
 
         #     emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterId").OutputValue')
       #     echo "EMR Cluster ID: $emr_cluster_id"
