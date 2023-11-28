@@ -4,8 +4,8 @@ on:
   # push:
   #   branches:
   #     - main
-  workflow_dispatch:
-#    types: [create-emr-cft]
+  repository_dispatch:
+    types: [create-emr-cft]
 
     inputs:
       stack-name:
