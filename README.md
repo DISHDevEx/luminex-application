@@ -1,8 +1,6 @@
 # luminex_application
 Luminex Application Code
 
-
-
 ~~~
 luminex_application-repo/
 |-- .github
@@ -16,8 +14,11 @@ luminex_application-repo/
 |   |-- kill_infra.py
 |-- infrastructure/
 |   |-- template.yaml
+|-- data-standardization
+|   |-- read_s3_data.py
 |-- config/
 |   |-- infra_config.yaml
+|   |-- aws_config.py
 |-- tests/
 |-- validation/
 |   |-- input_validator.py
