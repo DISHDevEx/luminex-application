@@ -11,6 +11,22 @@ on:
       stack-name:
         description: 'Name of stack'
         required: true
+        type: string
+
+      AWS_ACCESS_KEY_ID:
+        description: 'AWS temp cred: Access Key Id'
+        required: true
+        type: string
+
+      AWS_SECRET_ACCESS_KEY:
+        description: 'AWS temp cred: Secret Access Key'
+        required: true
+        type: string
+
+      AWS_SESSION_TOKEN:
+        description: 'AWS temp cred: Session Token'
+        required: true
+        type: string
 
 jobs:
   deployment:
@@ -27,9 +43,9 @@ jobs:
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-access-key-id: ${{ github.event.client_payload.inputs.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ github.event.client_payload.inputs.AWS_SESSION_TOKEN }}
           aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
       
 
