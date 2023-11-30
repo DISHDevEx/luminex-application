@@ -1,9 +1,15 @@
+import sys
+import os
+from io import BytesIO
+
 import pandas as pd
 import boto3
 import urllib3
-import aws_config
 from botocore.exceptions import EndpointConnectionError
-from io import BytesIO
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config import aws_config
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
