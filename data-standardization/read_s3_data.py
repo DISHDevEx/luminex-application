@@ -45,10 +45,29 @@ def read_csv_from_s3(bucket, key, aws_access_key_id=None, aws_secret_access_key=
         print(f"Error reading CSV data from S3: {e}")
         return None
 
+def display_dataframe_info(df):
+    """
+    Displays success message, number of rows, number of columns, and the first few rows of the DataFrame.
+
+    Parameters:
+    - df: Pandas DataFrame.
+    """
+    if df is not None:
+        # Display success message
+        print("DataFrame successfully created:")
+
+        # Display number of rows and columns
+        print(f"Number of Rows: {df.shape[0]}")
+        print(f"Number of Columns: {df.shape[1]}")
+
+        # Display the first few rows of the DataFrame
+        print("\nFirst few rows:")
+        print(df.head())
+
 def main():
-    # Bucket Details
-    bucket_name = 'luminex'
-    s3_key = 'input-data/sales_data_large.csv'
+    # Get user input for bucket_name and s3_key
+    bucket_name = input("Enter the S3 bucket name: ")
+    s3_key = input("Enter the S3 key (object key for the CSV file): ")
 
     # Optional: Provide AWS credentials and region if not configured via AWS CLI or environment variables
     df = read_csv_from_s3(bucket_name, s3_key,
@@ -58,10 +77,8 @@ def main():
                           aws_region='us-east-1'
                         )
 
-    if df is not None:
-        # Display success message along with the first few rows of the DataFrame.
-        print("DataFrame successfully created:")
-        print(df.head())
+    # Call the function to display DataFrame information
+    display_dataframe_info(df)
 
 if __name__ == "__main__":
     main()
