@@ -21,7 +21,7 @@ def read_csv_from_s3(bucket, key, aws_access_key_id=None, aws_secret_access_key=
     - aws_region (str): AWS region (optional if configured via AWS CLI or environment variables).
 
     Returns:
-    - pd.DataFrame: Pandas DataFrame containing the CSV data.
+    - dataframe: Pandas dataframe containing the CSV data.
     """
 
     try:
