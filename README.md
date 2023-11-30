@@ -19,5 +19,9 @@ luminex_application-repo/
 |-- config/
 |   |-- infra_config.yaml
 |-- tests/
+|-- validation/
+|   |-- input_validator.py
+|   |-- config.json
+|   |-- validate.py
 |-- README.md
 ~~~

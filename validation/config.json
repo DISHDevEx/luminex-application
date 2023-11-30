@@ -1,0 +1,5 @@
+{
+    "source_bucket": "dp.cisco.kafka.emr.output-dev-us-east-1",
+    "destination_bucket": "luminex",
+    "cft_file": "/Users/geetanjali.makineni/Desktop/GitHub/luminex-application/infrastructure/create-emr-cft.yml"
+}
