@@ -48,10 +48,10 @@ def read_csv_from_s3(bucket, key, aws_access_key_id=None, aws_secret_access_key=
 def main():
     # Bucket Details
     bucket_name = 'luminex'
-    csv_object_key = 'input-data/sales_data_large.csv'
+    s3_key = 'input-data/sales_data_large.csv'
 
     # Optional: Provide AWS credentials and region if not configured via AWS CLI or environment variables
-    df = read_csv_from_s3(bucket_name, csv_object_key,
+    df = read_csv_from_s3(bucket_name, s3_key,
                           aws_access_key_id=aws_config.aws_access_key_id,
                           aws_secret_access_key=aws_config.aws_secret_access_key,
                           aws_session_token=aws_config.aws_session_token,
