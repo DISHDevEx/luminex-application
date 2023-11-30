@@ -47,7 +47,7 @@ def read_csv_from_s3(bucket, key, aws_access_key_id=None, aws_secret_access_key=
 
 def display_dataframe_info(df):
     """
-    Displays success message, number of rows, number of columns, and the first few rows of the DataFrame.
+    Displays success message, number of rows, number of columns.
 
     Parameters:
     - df: Pandas DataFrame.
