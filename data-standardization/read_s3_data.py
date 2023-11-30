@@ -60,10 +60,6 @@ def display_dataframe_info(df):
         print(f"Number of Rows: {df.shape[0]}")
         print(f"Number of Columns: {df.shape[1]}")
 
-        # Display the first few rows of the DataFrame
-        print("\nFirst few rows:")
-        print(df.head())
-
 def main():
     # Get user input for bucket_name and s3_key
     bucket_name = input("Enter the S3 bucket name: ")
