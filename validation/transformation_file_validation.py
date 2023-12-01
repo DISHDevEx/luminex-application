@@ -1,9 +1,10 @@
 import json
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import urllib3
 
-# Disable SSL/TLS-related warnings
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# Suppress only the InsecureRequestWarning from urllib3 needed in this case
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class ETLFileValidator:
     def __init__(self, config_file):
@@ -13,7 +14,7 @@ class ETLFileValidator:
         Initialize the ETLFileValidator.
 
         Parameters:
-        - config_file (str): Path to the JSON configuration file containing the following keys:
+            - config_file (str): Path to the JSON configuration file containing the following keys:
             - organization (str): GitHub organization or username.
             - repo_name (str): Name of the GitHub repository.
             - file_path (str): Path to the file within the GitHub repository.
