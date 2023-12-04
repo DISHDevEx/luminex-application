@@ -1,7 +1,7 @@
 {
-    "source_bucket": "dp.cisco.kafka.emr.output-dev-us-east-1",
-    "destination_bucket": "luminex",
-    "cft_file": "/Users/geetanjali.makineni/Desktop/GitHub/luminex-application/infrastructure/create-emr-cft.yml",
+    "source_bucket": "xxx",
+    "destination_bucket": "xxx",
+    "cft_file": "xxx",
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
     "file_path" : "data-source/transformations/main.py",
