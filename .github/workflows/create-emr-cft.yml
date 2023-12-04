@@ -70,4 +70,4 @@ jobs:
 
       - name: Set outputs
         id: set-outputs
-        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}
+        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}"

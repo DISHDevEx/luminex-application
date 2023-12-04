@@ -1,10 +1,9 @@
 import requests
 import json
-import os
 
 def read_config(file_path='../config/infra_config.json'):
 
-    '''
+    """
     Returns the static parameters to run_infra from the config file.
 
             Parameters:
@@ -12,7 +11,7 @@ def read_config(file_path='../config/infra_config.json'):
 
             Returns:
                     config_data (dict): Represents the data in the config file
-    '''
+    """
 
     with open(file_path, 'r') as config_file:
         config_data = json.load(config_file)
@@ -20,7 +19,7 @@ def read_config(file_path='../config/infra_config.json'):
 
 def trigger_workflow(organization, repository, workflow_name, event_type, token, inputs=None):
 
-    '''
+    """
     Triggers the github actions to create the AWS infrastructure for Luminex.
 
             Parameters:
@@ -33,7 +32,7 @@ def trigger_workflow(organization, repository, workflow_name, event_type, token,
 
             Returns:
                     status_code (int): The code that explains the status of the trigger action.
-    '''
+    """
 
     url = f'https://api.github.com/repos/{organization}/{repository}/dispatches'
     print(url)
@@ -66,7 +65,7 @@ def trigger_workflow(organization, repository, workflow_name, event_type, token,
 
 def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN ):
 
-    '''
+    """
     Retrieves values from different sources and finally triggers the function to run the github action
 
             Parameters:
@@ -79,7 +78,7 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
             Returns:
                     Calls the trigger workflow function with required parameters (From config file: organization_name, repository_name
                     workflow_name, event_type, From user: personal_access_token, workflow_inputs)
-    '''
+    """
 
     config = read_config('../config/infra_config.json')
     organization_name = config.get('GITHUB_ORGANIZATION', 'your-organization')
