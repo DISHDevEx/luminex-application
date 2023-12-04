@@ -9,7 +9,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class ETLFileValidator:
     def __init__(self, config_file):
         
-
         """
         Initialize the ETLFileValidator.
 
