@@ -51,11 +51,11 @@ jobs:
       - name: Validate Stack
         run: python ../../validation/stack_name_validator.py
         env:
-          input-stack-name: ${{github.event.client_payload.inputs.stack-name}}
-          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
-          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          input-stack-name: ${{ secrets.input-stack-name}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
 
       - name: Deploy EMR cluster
         run: |
