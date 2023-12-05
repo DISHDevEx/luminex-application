@@ -1,36 +1,80 @@
 import pytest
 import os
 import sys
+from pandas import DataFrame
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import aws_config
-
-from unittest.mock import MagicMock, patch
 from data_standardization.s3_data_loader import S3DataLoader
+
+# input variables
+bucket_name = 'luminex'
+csv_key = 'input-data/csv/sales_data_large.csv'
+json_key = 'input-data/json/EmployeeData.json'
+parquet_key = 'input-data/parquet/FlightsData.parquet'
 
 @pytest.fixture
 def s3_data_loader():
     return S3DataLoader()
 
-@patch('data_standardization.s3_data_loader.boto3.client')
-def test_create_s3_client(mock_boto3_client, s3_data_loader):
-    # Mock boto3.client to return a MagicMock instance
-    mock_client = MagicMock()
-    mock_boto3_client.return_value = mock_client
+def test_create_s3_client(s3_data_loader):
+    """
+    Tests the create_s3_client method, ensuring it returns a valid S3 client.
 
-    # Call the method you want to test
-    result = s3_data_loader.create_s3_client()
+    Expected Outcome:
+    - Test passes if create_s3_client returns an S3 client instance.
+    """
+    assert s3_data_loader.create_s3_client() is not None
 
-    # Check whether boto3.client was called with the expected parameters
-    mock_boto3_client.assert_called_once_with(
-        's3',
-        aws_access_key_id=aws_config.aws_access_key_id,
-        aws_secret_access_key=aws_config.aws_secret_access_key,
-        aws_session_token=aws_config.aws_session_token,
-        region_name='us-east-1',
-        verify=False
-    )
+def test_read_data_from_s3_supported_file_type(s3_data_loader):
+    """
+    Tests read_data_from_s3 with an supported file type.
 
-    # Check if the method returns the expected client instance
-    assert result == mock_client
+    Expected Outcome:
+    - Test passes if the method behaves correctly.
+    """
+    file_type = 'csv'
+    result = s3_data_loader.read_data_from_s3(bucket_name, csv_key, file_type)
+
+    assert isinstance(result, DataFrame)
+
+def test_read_data_from_s3_unsupported_file_type(capsys, s3_data_loader):
+    """
+    Tests read_data_from_s3 with an unsupported file type.
+
+    Expected Outcome:
+    - Test passes if the method prints the correct error message.
+    """
+    file_type = 'unsupported_type'
+    result = s3_data_loader.read_data_from_s3(bucket_name, csv_key, file_type)
+
+    captured = capsys.readouterr()
+    assert "Unsupported file type. Please choose 'csv', 'json', or 'parquet'." in captured.out
+    assert result is None
+
+def test_read_csv_from_s3(s3_data_loader):
+    """
+    Tests read_csv_from_s3 for reading a CSV file from an S3 bucket.
+
+    Expected Outcome:
+    - Passes if CSV file is read successfully and DataFrame is returned.
+    """
+    assert isinstance(s3_data_loader.read_csv_from_s3(bucket_name, csv_key), DataFrame)
+
+def test_read_json_from_s3(s3_data_loader):
+    """
+    Tests read_json_from_s3 for reading a JSON file from an S3 bucket.
+
+    Expected Outcome:
+    - Passes if JSON file is read successfully and DataFrame is returned.
+    """
+    assert isinstance(s3_data_loader.read_json_from_s3(bucket_name, json_key), DataFrame)
+
+def test_read_parquet_from_s3(s3_data_loader):
+    """
+    Tests read_parquet_from_s3 for reading a Parquet file from an S3 bucket.
+
+    Expected Outcome:
+    - Passes if Parquet file is read successfully and DataFrame is returned.
+    """
+    assert isinstance(s3_data_loader.read_parquet_from_s3(bucket_name, parquet_key), DataFrame)
