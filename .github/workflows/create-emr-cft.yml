@@ -1,8 +1,9 @@
 name: Deploy EMR Cluster using CFT template
 
 on:
-  repository_dispatch:
-    types: [create-emr-cft]
+  push:
+    branches:
+    - prashanth/stack-name/actions
 
     inputs:
       stack-name:
