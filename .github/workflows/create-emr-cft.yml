@@ -1,73 +1,73 @@
-name: Deploy EMR Cluster using CFT template
-
-on:
-  repository_dispatch:
-    types: [create-emr-cft]
-
-    inputs:
-      stack-name:
-        description: 'Name of stack'
-        required: true
-        type: string
-
-      AWS_ACCESS_KEY_ID:
-        description: 'AWS temp cred: Access Key Id'
-        required: true
-        type: string
-
-      AWS_SECRET_ACCESS_KEY:
-        description: 'AWS temp cred: Secret Access Key'
-        required: true
-        type: string
-
-      AWS_SESSION_TOKEN:
-        description: 'AWS temp cred: Session Token'
-        required: true
-        type: string
-
-jobs:
-  deployment:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Checkout files
-        run: |
-          ls -l
-
-      - name: Configure AWS credentials
-        id: creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
-          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
-
-      - name: Deploy EMR cluster
-        run: |
-          stack_id=$(aws cloudformation create-stack \
-            --stack-name ${{github.event.client_payload.inputs.stack-name}} \
-            --template-body file://./infrastructure/create-emr-cft.yml \
-            --parameters file://./infrastructure/config_parameter.json \
-            --role-arn arn:aws:iam::355648722862:role/dish-dp-CICDAcctCodePipelineCloudFormationRole\
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-            | jq -r '.StackId')
-          echo "CloudFormation stack ID: $stack_id"
-
-      - name: Wait for stack creation completion
-        run: |
-          aws cloudformation wait stack-create-complete --stack-name ${{ github.event.client_payload.inputs.stack-name }}
-
-      - name: Extract EMR Cluster ID
-        id: extract-cluster-id
-        run: |
-          emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx \
-            | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterIdOutput") | .OutputValue')
-          echo "EMR Cluster ID: $emr_cluster_id"
-        shell: bash
-
-      - name: Set outputs
-        id: set-outputs
-        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}"
+#name: Deploy EMR Cluster using CFT template
+#
+#on:
+#  repository_dispatch:
+#    types: [create-emr-cft]
+#
+#    inputs:
+#      stack-name:
+#        description: 'Name of stack'
+#        required: true
+#        type: string
+#
+#      AWS_ACCESS_KEY_ID:
+#        description: 'AWS temp cred: Access Key Id'
+#        required: true
+#        type: string
+#
+#      AWS_SECRET_ACCESS_KEY:
+#        description: 'AWS temp cred: Secret Access Key'
+#        required: true
+#        type: string
+#
+#      AWS_SESSION_TOKEN:
+#        description: 'AWS temp cred: Session Token'
+#        required: true
+#        type: string
+#
+#jobs:
+#  deployment:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Checkout files
+#        run: |
+#          ls -l
+#
+#      - name: Configure AWS credentials
+#        id: creds
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
+#          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
+#          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
+#          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+#
+#      - name: Deploy EMR cluster
+#        run: |
+#          stack_id=$(aws cloudformation create-stack \
+#            --stack-name ${{github.event.client_payload.inputs.stack-name}} \
+#            --template-body file://./infrastructure/create-emr-cft.yml \
+#            --parameters file://./infrastructure/config_parameter.json \
+#            --role-arn arn:aws:iam::355648722862:role/dish-dp-CICDAcctCodePipelineCloudFormationRole\
+#            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+#            | jq -r '.StackId')
+#          echo "CloudFormation stack ID: $stack_id"
+#
+#      - name: Wait for stack creation completion
+#        run: |
+#          aws cloudformation wait stack-create-complete --stack-name ${{ github.event.client_payload.inputs.stack-name }}
+#
+#      - name: Extract EMR Cluster ID
+#        id: extract-cluster-id
+#        run: |
+#          emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx \
+#            | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterIdOutput") | .OutputValue')
+#          echo "EMR Cluster ID: $emr_cluster_id"
+#        shell: bash
+#
+#      - name: Set outputs
+#        id: set-outputs
+#        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}"

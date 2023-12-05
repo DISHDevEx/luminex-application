@@ -1,52 +1,52 @@
-name: Deploy EMR Cluster
-on:
-  repository_dispatch:  # Add this block for manual triggering
-    types: [create-emr]
-    inputs:
-      cluster-name:
-        description: 'Name of the EMR cluster'
-        required: true
-      release-label:
-        description: 'EMR release label'
-        required: true
-      subnet-id:
-        description: 'ID of the subnet for the EMR cluster'
-        required: true
-      key-name:
-        description: 'Name of the EC2 key pair'
-        required: true
-      instance-type:
-        description: 'EC2 instance type for the cluster nodes'
-        required: true
-env:
-  AWS_REGION : ${{ secrets.AWS_REGION }}
-# permission can be added at job level or workflow level
-# permissions:
-#       id-token: write   # This is required for requesting the JWT
-jobs:
-   deployment:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Checkout files
-      run: | 
-        ls -l
-    - name: Configure AWS credentials
-      id: creds
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
-
-
-    - name: Create EMR cluster
-      run: |
-          aws emr create-cluster --name "${{ github.event.client_payload.inputs.cluster-name }}" \
-          --release-label "${{ github.event.client_payload.inputs.release-label }}" \
-          --use-default-roles \
-          --ec2-attributes SubnetId="${{ github.event.client_payload.inputs.subnet-id }}",KeyName="${{ github.event.client_payload.inputs.key-name }}" \
-          --applications Name=Hadoop Name=Spark \
-          --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType="${{ github.event.client_payload.inputs.instance-type }}" InstanceGroupType=CORE,InstanceCount=2,InstanceType="${{ github.event.client_payload.inputs.instance-type }}"
+#name: Deploy EMR Cluster
+#on:
+#  repository_dispatch:  # Add this block for manual triggering
+#    types: [create-emr]
+#    inputs:
+#      cluster-name:
+#        description: 'Name of the EMR cluster'
+#        required: true
+#      release-label:
+#        description: 'EMR release label'
+#        required: true
+#      subnet-id:
+#        description: 'ID of the subnet for the EMR cluster'
+#        required: true
+#      key-name:
+#        description: 'Name of the EC2 key pair'
+#        required: true
+#      instance-type:
+#        description: 'EC2 instance type for the cluster nodes'
+#        required: true
+#env:
+#  AWS_REGION : ${{ secrets.AWS_REGION }}
+## permission can be added at job level or workflow level
+## permissions:
+##       id-token: write   # This is required for requesting the JWT
+#jobs:
+#   deployment:
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v4
+#    - name: Checkout files
+#      run: |
+#        ls -l
+#    - name: Configure AWS credentials
+#      id: creds
+#      uses: aws-actions/configure-aws-credentials@v4
+#      with:
+#        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+#        aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
+#
+#
+#    - name: Create EMR cluster
+#      run: |
+#          aws emr create-cluster --name "${{ github.event.client_payload.inputs.cluster-name }}" \
+#          --release-label "${{ github.event.client_payload.inputs.release-label }}" \
+#          --use-default-roles \
+#          --ec2-attributes SubnetId="${{ github.event.client_payload.inputs.subnet-id }}",KeyName="${{ github.event.client_payload.inputs.key-name }}" \
+#          --applications Name=Hadoop Name=Spark \
+#          --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType="${{ github.event.client_payload.inputs.instance-type }}" InstanceGroupType=CORE,InstanceCount=2,InstanceType="${{ github.event.client_payload.inputs.instance-type }}"
