@@ -28,7 +28,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
 ##          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
-#          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
       # install dependancies for pytests
       - name: Install dependencies
         ## upgrade pip, install pytest, install s3fs, and all requirements.
