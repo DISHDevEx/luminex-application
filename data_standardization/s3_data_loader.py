@@ -1,24 +1,26 @@
 import sys
 import os
 from io import BytesIO
+from botocore.exceptions import EndpointConnectionError
+from config import aws_config
 
 import pandas as pd
 import boto3
 import urllib3
 import pyarrow.parquet as pq
-from botocore.exceptions import EndpointConnectionError
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import aws_config
+
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 class S3DataLoader:
     def __init__(self):
         """
-        Initialize the S3DataLoader instance by creating an S3 client with configured credentials.
+        Initialize S3DataLoader with an S3 client using configured credentials.
 
         Parameters:
         - None
@@ -32,10 +34,11 @@ class S3DataLoader:
         Returns:
         - s3_client: Configured S3 client.
         """
-        s3_client = boto3.client('s3', aws_access_key_id=aws_config.aws_access_key_id,
-                                 aws_secret_access_key=aws_config.aws_secret_access_key,
-                                 aws_session_token=aws_config.aws_session_token,
-                                 region_name='us-east-1', verify=False)
+        s3_client = boto3.client(
+            's3', aws_access_key_id=aws_config.aws_access_key_id,
+            aws_secret_access_key=aws_config.aws_secret_access_key,
+            aws_session_token=aws_config.aws_session_token,
+            region_name='us-east-1', verify=False)
         return s3_client
 
     def read_csv_from_s3(self, bucket, key):
@@ -110,7 +113,7 @@ class S3DataLoader:
 
     def read_data_from_s3(self, bucket, key, file_type):
         """
-        Reads data from an S3 bucket based on the specified file type and returns a Pandas DataFrame.
+        Reads data from an S3 bucket by file type, returns a Pandas DataFrame.
 
         Parameters:
         - bucket (str): The name of the S3 bucket.
@@ -127,7 +130,7 @@ class S3DataLoader:
         elif file_type.lower() == "parquet":
             return self.read_parquet_from_s3(bucket, key)
         else:
-            print("Unsupported file type. Please choose 'csv', 'json', or 'parquet'.")
+            print("Unsupported file type.Choose 'csv', 'json', or 'parquet'.")
             return None
 
     def display_dataframe_info(self, df):
@@ -146,15 +149,17 @@ class S3DataLoader:
 
     def main(self):
         """
-        Main function to interact with the user, read data from S3, and display DataFrame information.
+        Interacts with the user, reads S3 data, and displays DataFrame info.
         """
-        file_type = input("Enter the file type ('csv', 'json', or 'parquet'): ")
+        file_type = input("Enter the file type (csv/json/parquet):")
         bucket_name = input("Enter the S3 bucket name: ")
         s3_key = input(f"Enter S3 key for the {file_type.upper()} file: ")
 
         df = self.read_data_from_s3(bucket_name, s3_key, file_type)
         self.display_dataframe_info(df)
 
+
 if __name__ == "__main__":
+
     data_loader = S3DataLoader()
     data_loader.main()
