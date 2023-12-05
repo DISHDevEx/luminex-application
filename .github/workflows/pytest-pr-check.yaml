@@ -26,8 +26,8 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
+#          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+#          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
           aws-region: ${{ env.AWS_REGION }}
       # install dependancies for pytests
       - name: Install dependencies
@@ -43,8 +43,8 @@ jobs:
       - name: Test with pytest
         ## the environment in pytest gets passed some secrets from the github secrets
         env:
-           ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
-           SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
+#           ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
+#           SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
            BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST }}
            PYTEST_FLAG:  "True"
         ##define some code here to also run during pytest
