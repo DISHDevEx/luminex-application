@@ -22,6 +22,8 @@ luminex_application-repo/
 |-- tests/
 |-- validation/
 |   |-- input_validator.py
+|   |-- permissions_validator.py
+|   |-- transformation_file_validation.py
 |   |-- config.json
 |   |-- validate.py
 |-- README.md
