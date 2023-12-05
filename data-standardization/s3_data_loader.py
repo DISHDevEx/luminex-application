@@ -17,6 +17,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class S3DataLoader:
     def __init__(self):
+        """
+        Initialize the S3DataLoader instance by creating an S3 client with configured credentials.
+
+        Parameters:
+        - None
+        """
         self.s3_client = self.create_s3_client()
 
     def create_s3_client(self):
@@ -33,6 +39,16 @@ class S3DataLoader:
         return s3_client
 
     def read_csv_from_s3(self, bucket, key):
+        """
+        Reads a CSV file from an S3 bucket and returns a Pandas DataFrame.
+
+        Parameters:
+        - bucket (str): The name of the S3 bucket.
+        - key (str): The object key for the CSV file in the S3 bucket.
+
+        Returns:
+        - dataframe: Pandas dataframe containing the CSV data.
+        """
         try:
             response = self.s3_client.get_object(Bucket=bucket, Key=key)
             csv_data = response['Body'].read()
@@ -46,6 +62,16 @@ class S3DataLoader:
             return None
 
     def read_json_from_s3(self, bucket, key):
+        """
+        Reads a JSON file from an S3 bucket and returns a Pandas DataFrame.
+
+        Parameters:
+        - bucket (str): The name of the S3 bucket.
+        - key (str): The object key for the JSON file in the S3 bucket.
+
+        Returns:
+        - dataframe: Pandas dataframe containing the JSON data.
+        """
         try:
             response = self.s3_client.get_object(Bucket=bucket, Key=key)
             json_data = response['Body'].read()
@@ -59,6 +85,16 @@ class S3DataLoader:
             return None
 
     def read_parquet_from_s3(self, bucket, key):
+        """
+        Reads a Parquet file from an S3 bucket and returns a Pandas DataFrame.
+
+        Parameters:
+        - bucket (str): The name of the S3 bucket.
+        - key (str): The object key for the Parquet file in the S3 bucket.
+
+        Returns:
+        - dataframe: Pandas dataframe containing the Parquet data.
+        """
         try:
             response = self.s3_client.get_object(Bucket=bucket, Key=key)
             parquet_data = response['Body'].read()
@@ -73,6 +109,17 @@ class S3DataLoader:
             return None
 
     def read_data_from_s3(self, bucket, key, file_type):
+        """
+        Reads data from an S3 bucket based on the specified file type and returns a Pandas DataFrame.
+
+        Parameters:
+        - bucket (str): The name of the S3 bucket.
+        - key (str): The object key for the file in the S3 bucket.
+        - file_type (str): The type of file ("csv", "json", or "parquet").
+
+        Returns:
+        - dataframe: Pandas dataframe containing the file data.
+        """
         if file_type.lower() == "csv":
             return self.read_csv_from_s3(bucket, key)
         elif file_type.lower() == "json":
@@ -84,6 +131,12 @@ class S3DataLoader:
             return None
 
     def display_dataframe_info(self, df):
+        """
+        Displays success message, number of rows, number of columns.
+
+        Parameters:
+        - df: Pandas DataFrame.
+        """
         if df is not None:
             print("\n****------DataFrame successfully created------****")
             print(f"Number of Rows: {df.shape[0]}")
@@ -92,6 +145,9 @@ class S3DataLoader:
             print("DataFrame is None. No further information to display.")
 
     def main(self):
+        """
+        Main function to interact with the user, read data from S3, and display DataFrame information.
+        """
         file_type = input("Enter the file type ('csv', 'json', or 'parquet'): ")
         bucket_name = input("Enter the S3 bucket name: ")
         s3_key = input(f"Enter S3 key for the {file_type.upper()} file: ")
