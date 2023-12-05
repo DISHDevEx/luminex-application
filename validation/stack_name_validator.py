@@ -10,7 +10,7 @@ def stack_exists(stack_name):
         return True  # Stack exists
     except cf_client.exceptions.ClientError as e:
         if 'does not exist' in str(e):
-            return False  # Stack does not exist
+            return True  # Stack does not exist
         else:
             raise  # Some other error
 
