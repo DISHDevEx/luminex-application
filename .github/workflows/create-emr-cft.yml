@@ -47,7 +47,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN}}
           aws-region: ${{ secrets.AWS_Region || 'us-east-1'}}
-
+      - name: Install Boto3
+        run: pip install boto3
       - name: Validate Stack
         run: python validation/stack_name_validator.py
         env:
