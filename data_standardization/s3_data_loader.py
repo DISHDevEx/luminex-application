@@ -138,7 +138,7 @@ class S3DataLoader:
         - df: Pandas DataFrame.
         """
         if df is not None:
-            print("\n****------DataFrame successfully created------****")
+            print("\n****-----DataFrame successfully created-----****")
             print(f"Number of Rows: {df.shape[0]}")
             print(f"Number of Columns: {df.shape[1]}")
         else:
