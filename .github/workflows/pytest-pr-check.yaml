@@ -23,10 +23,10 @@ jobs:
           java-version: '17'
       ##here we are going to configure aws credentials
       ## use the github workflows action: aws-actions
-#      - name: configure aws credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-##          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
 ##          role-session-name: ${{ secrets.ROLE_SESSION_NAME }}
 #          aws-region: ${{ env.AWS_REGION }}
       # install dependancies for pytests
@@ -43,7 +43,7 @@ jobs:
       - name: Test with pytest
         ## the environment in pytest gets passed some secrets from the github secrets
         env:
-#           ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
+           ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
 #           SAMPLE_ROLE_SESSION: ${{ secrets.ROLE_SESSION_NAME }}
            PYTEST_FLAG:  "True"
         ##define some code here to also run during pytest
