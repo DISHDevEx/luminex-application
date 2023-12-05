@@ -49,7 +49,7 @@ def test_read_data_from_s3_unsupported_file_type(capsys, s3_data_loader):
     result = s3_data_loader.read_data_from_s3(bucket_name, csv_key, file_type)
 
     captured = capsys.readouterr()
-    assert "Unsupported file type. Please choose 'csv', 'json', or 'parquet'." in captured.out
+    assert "Unsupported file type.Choose 'csv', 'json', or 'parquet'." in captured.out
     assert result is None
 
 def test_read_csv_from_s3(s3_data_loader):
