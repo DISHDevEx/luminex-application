@@ -16,10 +16,10 @@ def stack_exists(stack_name):
 
 if __name__ == "__main__":
     # Check if the stack name is provided as input from GitHub Actions
-    stack_name = os.getenv('input-stack-name')
+    stack_name = os.getenv('input_stack_name')
 
     if not stack_name:
-        print("Error: input-stack-name not set.")
+        print("Error: input_stack_name not set.")
         sys.exit(1)
 
     # AWS CloudFormation Stack Existence Check
