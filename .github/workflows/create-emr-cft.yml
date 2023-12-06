@@ -35,22 +35,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      env: ${{ steps.setenv.outputs.env }}
-
-    steps:
-      - name: Set Environment Variables
-        id: setenv
-        run: echo "STACK_NAME=${{ secrets.input_stack_name }}" >> $GITHUB_ENV
-        shell: bash
-
-  validate-stack:
-    needs: deployment
-    runs-on: ubuntu-latest
-
-
       - name: Checkout files
         run: |
           ls -l
