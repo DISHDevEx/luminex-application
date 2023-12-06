@@ -53,13 +53,13 @@ jobs:
       
       - name: Validate Stack
         env:
-          input-stack-name: ${{ secrets.input_stack_name}}
+          input-stack-name: ${{ secrets.INPUT_STACK_NAME}}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_Region || 'us-east-1' }}
         run: |
-          echo "INPUT_STACK_NAME=${input_stack_name}"
+          echo "INPUT_STACK_NAME=${INPUT_STACK_NAME}"
           python validation/stack_name_validator.py
       
       - name: Deploy EMR cluster
