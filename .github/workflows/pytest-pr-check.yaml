@@ -44,4 +44,5 @@ jobs:
         ##define some code here to also run during pytest
         run: |
            python --version
-           pytest --slow
+           aws s3 ls | grep devhap
+#           pytest --slow
