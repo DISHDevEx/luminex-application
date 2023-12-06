@@ -58,7 +58,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_Region || 'us-east-1' }}
-        run: python validation/stack_name_validator.py
+        run: |
+          echo "INPUT_STACK_NAME=${INPUT_STACK_NAME}"
+          python validation/stack_name_validator.py
       
       - name: Deploy EMR cluster
         run: |
