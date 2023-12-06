@@ -1,23 +1,49 @@
+"""
+This module defines the S3DataLoader class,which interacts with an S3 bucket,
+reads various file types (CSV, JSON, Parquet),
+and displays information about the resulting Pandas DataFrame.
+"""
 import sys
 import os
+import json
+
 from io import BytesIO
 from botocore.exceptions import EndpointConnectionError
-from config import aws_config
 
 import pandas as pd
+import pandas.errors
 import boto3
 import urllib3
+import pyarrow
 import pyarrow.parquet as pq
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from config import aws_config
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class S3DataLoader:
+    """
+    S3DataLoader: Manages interaction with S3, reads CSV, JSON, or Parquet files,
+    and displays Pandas DataFrame.
+
+    Attributes:
+        s3_client (boto3.client): S3 client with configured credentials.
+
+    Methods:
+        - __init__: Initialize S3DataLoader with configured S3 client.
+        - create_s3_client: Create S3 client with configured credentials.
+        - read_csv_from_s3: Read CSV file from S3 and return Pandas DataFrame.
+        - read_json_from_s3: Read JSON file from S3 and return Pandas DataFrame.
+        - read_parquet_from_s3: Read Parquet file from S3 and return Pandas DataFrame.
+        - read_data_from_s3: Read data from S3 by file type and return Pandas DataFrame.
+        - display_dataframe_info: Display success message and DataFrame details.
+        - main: Interact with user, read S3 data, and display DataFrame info.
+    """
+
     def __init__(self):
         """
         Initialize S3DataLoader with an S3 client using configured credentials.
@@ -60,7 +86,7 @@ class S3DataLoader:
         except EndpointConnectionError as e:
             print(f"Endpoint Connection Error: {e}")
             return None
-        except Exception as e:
+        except (pandas.errors.EmptyDataError, pandas.errors.ParserError) as e:
             print(f"Error reading CSV data from S3: {e}")
             return None
 
@@ -83,7 +109,7 @@ class S3DataLoader:
         except EndpointConnectionError as e:
             print(f"Endpoint Connection Error: {e}")
             return None
-        except Exception as e:
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
             print(f"Error reading JSON data from S3: {e}")
             return None
 
@@ -107,7 +133,7 @@ class S3DataLoader:
         except EndpointConnectionError as e:
             print(f"Endpoint Connection Error: {e}")
             return None
-        except Exception as e:
+        except pyarrow.ArrowIOError as e:
             print(f"Error reading Parquet data from S3: {e}")
             return None
 
@@ -125,13 +151,13 @@ class S3DataLoader:
         """
         if file_type.lower() == "csv":
             return self.read_csv_from_s3(bucket, key)
-        elif file_type.lower() == "json":
+        if file_type.lower() == "json":
             return self.read_json_from_s3(bucket, key)
-        elif file_type.lower() == "parquet":
+        if file_type.lower() == "parquet":
             return self.read_parquet_from_s3(bucket, key)
-        else:
-            print("Unsupported file type.Choose 'csv', 'json', or 'parquet'.")
-            return None
+
+        print("Unsupported file type. Choose 'csv', 'json', or 'parquet'.")
+        return None
 
     def display_dataframe_info(self, df):
         """
