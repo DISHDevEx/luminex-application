@@ -35,6 +35,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.setenv.outputs.env }}
+
+    steps:
+      - name: Set Environment Variables
+        id: setenv
+        run: echo "STACK_NAME=${{ secrets.input_stack_name }}" >> $GITHUB_ENV
+        shell: bash
+
+  validate-stack:
+    needs: deployment
+    runs-on: ubuntu-latest
+
+
       - name: Checkout files
         run: |
           ls -l
@@ -49,6 +65,8 @@ jobs:
           aws-region: ${{ secrets.AWS_Region || 'us-east-1'}}
       - name: Install Boto3
         run: pip install boto3
+
+      
       - name: Validate Stack
         run: python validation/stack_name_validator.py
         env:
