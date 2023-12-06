@@ -1,14 +1,14 @@
 {
     "source_bucket": "xxx",
     "destination_bucket": "xxx",
-    "cft_file": "xxx",
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
     "file_path" : "data-source/transformations/main.py",
     "access_token": "xxx",
-    "cft_path": "/Users/geetanjali.makineni/Desktop/GitHub/luminex-application/infrastructure/create-emr-cft.yml",
     "permissions": {
-    "role_name_1": ["permission1", "permission2"],
-    "role_name_2": ["permission3", "permission4"]
-  }
+        "StackSet-xxx": [
+            "IAMFullAccess",
+            "AmazonS3FullAccess"
+        ]
+      }
 }
