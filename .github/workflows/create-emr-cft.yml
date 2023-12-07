@@ -60,7 +60,7 @@ jobs:
           aws-region: ${{ secrets.AWS_Region || 'us-east-1' }}
           stack-name: ${{ secrets.INPUT_STACK_NAME}}
         run: |
-          echo $stack_name
+          echo $stack-name
           python validation/stack_name_validator.py
       
       - name: Deploy EMR cluster
