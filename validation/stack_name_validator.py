@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Check if the stack name is provided as a command-line argument
 
 
-    input_stack_name = os.getenv('stack_name')
+    input_stack_name = os.getenv(stack_name)
     print(input_stack_name)
 
     # AWS CloudFormation Stack Existence Check
