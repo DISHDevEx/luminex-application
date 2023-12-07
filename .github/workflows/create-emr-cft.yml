@@ -58,7 +58,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_Region || 'us-east-1' }}
-          stack-name: ${{github.event.client_payload.inputs.stack-name}}
+          stack-name: ${{ secrets.input_stack_name}}
         run: |
           echo $stack_name
         #python validation/stack_name_validator.py
