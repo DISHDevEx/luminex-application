@@ -166,8 +166,9 @@ class S3DataLoader:
         file_type = input("Enter the file type (csv/json/parquet):")
         bucket_name = input("Enter the S3 bucket name: ")
         s3_key = input(f"Enter S3 key for the {file_type.upper()} file: ")
+        self.bucket_name = bucket_name
 
-        df = self.read_data_from_s3(bucket_name, s3_key, file_type)
+        df = self.read_data_from_s3(s3_key, file_type)
         self.display_dataframe_info(df)
 
 
