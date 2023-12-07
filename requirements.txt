@@ -3,3 +3,4 @@ numpy>=1.21.6
 boto3>=1.26.29
 fastparquet>=0.8.1
 pyarrow>=11.0.0
+python-dotenv
