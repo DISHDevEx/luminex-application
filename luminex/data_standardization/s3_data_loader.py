@@ -17,7 +17,6 @@ import pyarrow.parquet as pq
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from config import aws_config
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -52,8 +51,6 @@ class S3DataLoader:
         self.bucket_name = bucket_name
         self.client = boto3.client('s3')
         self.resource = boto3.resource('s3')
-        # if self.bucket_name is None:
-        #     raise Exception("Please Initialize Class parameters")
 
 
     def read_csv_from_s3(self, key):
@@ -139,11 +136,11 @@ class S3DataLoader:
         - dataframe: Pandas dataframe containing the file data.
         """
         if file_type.lower() == "csv":
-            return self.read_csv_from_s3(self.bucket_name, key)
+            return self.read_csv_from_s3(key)
         if file_type.lower() == "json":
-            return self.read_json_from_s3(self.bucket_name, key)
+            return self.read_json_from_s3(key)
         if file_type.lower() == "parquet":
-            return self.read_parquet_from_s3(self.bucket_name, key)
+            return self.read_parquet_from_s3(key)
 
         print("Unsupported file type. Choose 'csv', 'json', or 'parquet'.")
         return None

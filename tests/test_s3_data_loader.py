@@ -16,17 +16,17 @@ CSV_KEY = os.getenv("CSV_KEY_PYTEST")
 JSON_KEY = os.getenv("JSON_KEY_PYTEST")
 PARQUET_KEY = os.getenv("PARQUET_KEY_PYTEST")
 
-# def test_read_data_from_s3_supported_file_type(s3_loader):
-#     """
-#     Tests read_data_from_s3 with a supported file type.
-#
-#     Expected Outcome:
-#     - Test passes if the method behaves correctly.
-#     """
-#     file_type = 'csv'
-#     result = s3_loader.read_data_from_s3(key=CSV_KEY, file_type=file_type)
-#
-#     assert isinstance(result, DataFrame)
+def test_read_data_from_s3_supported_file_type(s3_loader):
+    """
+    Tests read_data_from_s3 with a supported file type.
+
+    Expected Outcome:
+    - Test passes if the method behaves correctly.
+    """
+    file_type = 'csv'
+    result = s3_loader.read_data_from_s3(key=CSV_KEY, file_type=file_type)
+
+    assert isinstance(result, DataFrame)
 
 
 def test_read_data_from_s3_unsupported_file_type(capsys, s3_loader):
