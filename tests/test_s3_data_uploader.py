@@ -1,41 +1,55 @@
 import pytest
-import pandas as pd
-from unittest.mock import patch
-from ..data_standardization.s3_data_loader import S3DataLoader
-from ..data_standardization.s3_json_uploader import S3DataUploader
-from ..config import aws_config
+import os
+import sys
 
-@pytest.fixture
-def s3_data_loader_instance():
-    return S3DataLoader()
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from data_standardization.s3_json_uploader import S3DataUploader
+import pandas as pd
+
+#input variables
+bucket_name = "luminex"
+file_name = "test-output-json"
+s3_key = "transformed-data"
+
+
+file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
 
 @pytest.fixture
 def s3_data_uploader_instance():
     return S3DataUploader()
 
-@patch('builtins.input', side_effect=['csv', 'test_bucket', 'test_key', 'test_file'])
-def test_main_flow(mock_input, s3_data_uploader_instance):
-    with patch('s3_data_loader.S3DataLoader.read_data_from_s3', return_value=pd.DataFrame()):
-        with patch('builtins.print') as mock_print:
-            s3_data_uploader_instance.main()
+@pytest.fixture
+def sample_dataframe(file_path):
+    # Create a sample DataFrame for testing
+    sample_dataframe = pd.read_csv(file_path)
+    return pd.DataFrame(sample_dataframe)
 
-    mock_input.assert_called_with("Enter the file type (csv/json/parquet):")
-    mock_print.assert_called_with('****-----Data successfully standardized to json-----****')
+def test_convert_df_to_json(s3_data_uploader_instance, sample_dataframe):
+    # Test the convert_df_to_json method
+    json_data = s3_data_uploader_instance.convert_df_to_json(sample_dataframe)
+    assert isinstance(json_data, str)
+    # Add more assertions based on your specific requirements
 
-@patch('builtins.input', side_effect=['csv', 'test_bucket', 'test_file_without_extension', 'test_key'])
-@patch('s3_data_loader.S3DataLoader.read_data_from_s3', return_value=pd.DataFrame())
-@patch('s3_data_uploader.S3DataUploader.convert_df_to_json', return_value='{"test": "json"}')
-@patch('s3_data_uploader.S3DataUploader.upload_json_data_to_s3')
+def test_upload_json_data_to_s3(s3_data_uploader_instance, sample_dataframe,bucket_name, file_name, s3_key):
+    # Test the upload_json_data_to_s3 method
+    json_data = s3_data_uploader_instance.convert_df_to_json(sample_dataframe)
 
-def test_upload_json_data(mock_input, mock_read_data, mock_convert_to_json, mock_upload_to_s3, s3_data_uploader_instance):
+    # Create an S3 bucket if it doesn't exist
+    conn = s3_data_uploader_instance.s3_utils_instance.create_s3_client()
+    try:
+        conn.head_bucket(Bucket=bucket_name)
+    except conn.exceptions.NoSuchBucket:
+        conn.create_bucket(Bucket=bucket_name)
 
-    s3_data_uploader_instance.main()
-    mock_input.assert_called_with("Enter the file type (csv/json/parquet):")
-    mock_read_data.assert_called_with('test_bucket', 'test_key', 'csv')
-    mock_convert_to_json.assert_called_with(pd.DataFrame())
-    mock_upload_to_s3.assert_called_with('{"test": "json"}', 'test_bucket', 'test_file.json', 'test_key')
+    # Mock the S3 client and other dependencies as needed for testing
+    # For example, you can use a library like moto to mock AWS services
 
-def test_s3_data_loader_create_s3_client(s3_data_loader_instance):
-    s3_client = s3_data_loader_instance.create_s3_client()
-    assert s3_client is not None
-    assert s3_client._service_model.service_name == 's3'
+    # Call the method and assert the expected behavior
+    result = s3_data_uploader_instance.upload_json_data_to_s3(json_data, bucket_name, file_name, s3_key)
+
+    # Assert that the S3 object was created
+    objects = conn.list_objects(Bucket=bucket_name)
+    assert len(objects.get('Contents', [])) == 1
+    assert objects['Contents'][0]['Key'] == f'{s3_key}/{file_name}'
+    assert result is not None 
