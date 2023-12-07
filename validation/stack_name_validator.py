@@ -1,3 +1,4 @@
+
 import sys
 import boto3
 import os
@@ -16,9 +17,7 @@ def stack_exists(input_stack_name):
 
 if __name__ == "__main__":
     # Check if the stack name is provided as a command-line argument
-    if len(sys.argv) < 2:
-        print("Error: Stack name not provided.")
-        sys.exit(1)
+
 
     input_stack_name = os.getenv(stack-name)
 
