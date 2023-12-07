@@ -40,6 +40,10 @@ jobs:
         ## the environment in pytest gets passed some secrets from the github secrets
         env:
            ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
+           BUCKET_NAME_PYTEST: ${{ secrets.BUCKET_NAME_PYTEST }}
+           CSV_KEY_PYTEST: ${{ secrets.CSV_KEY_PYTEST }}
+           JSON_KEY_PYTEST: ${{ secrets.JSON_KEY_PYTEST }}
+           PARQUET_KEY_PYTEST: ${{ secrets.PARQUET_KEY_PYTEST }}
            PYTEST_FLAG:  "True"
         ##define some code here to also run during pytest
         run: |
