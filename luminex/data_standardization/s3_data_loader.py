@@ -6,19 +6,17 @@ and displays information about the resulting Pandas DataFrame.
 import sys
 import os
 import json
-
 from io import BytesIO
-from botocore.exceptions import EndpointConnectionError
 
-import pandas as pd
-import pandas.errors
 import boto3
+from botocore.exceptions import EndpointConnectionError
+import pandas as pd
 import urllib3
 import pyarrow
 import pyarrow.parquet as pq
 
 # Add the parent directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from config import aws_config
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
@@ -44,30 +42,21 @@ class S3DataLoader:
         - main: Interact with user, read S3 data, and display DataFrame info.
     """
 
-    def __init__(self):
+    def __init__(self, bucket_name=None):
         """
         Initialize S3DataLoader with an S3 client using configured credentials.
 
         Parameters:
         - None
         """
-        self.s3_client = self.create_s3_client()
+        self.bucket_name = bucket_name
+        self.client = boto3.client('s3')
+        self.resource = boto3.resource('s3')
+        # if self.bucket_name is None:
+        #     raise Exception("Please Initialize Class parameters")
 
-    def create_s3_client(self):
-        """
-        Creates an S3 client with configured credentials.
 
-        Returns:
-        - s3_client: Configured S3 client.
-        """
-        s3_client = boto3.client(
-            's3', aws_access_key_id=aws_config.aws_access_key_id,
-            aws_secret_access_key=aws_config.aws_secret_access_key,
-            aws_session_token=aws_config.aws_session_token,
-            region_name='us-east-1', verify=False)
-        return s3_client
-
-    def read_csv_from_s3(self, bucket, key):
+    def read_csv_from_s3(self, key):
         """
         Reads a CSV file from an S3 bucket and returns a Pandas DataFrame.
 
@@ -79,18 +68,18 @@ class S3DataLoader:
         - dataframe: Pandas dataframe containing the CSV data.
         """
         try:
-            response = self.s3_client.get_object(Bucket=bucket, Key=key)
+            response = self.client.get_object(Bucket=self.bucket_name, Key=key)
             csv_data = response['Body'].read()
             dataframe = pd.read_csv(BytesIO(csv_data))
             return dataframe
         except EndpointConnectionError as e:
             print(f"Endpoint Connection Error: {e}")
             return None
-        except (pandas.errors.EmptyDataError, pandas.errors.ParserError) as e:
+        except (pd.errors.EmptyDataError, pd.errors.ParserError) as e:
             print(f"Error reading CSV data from S3: {e}")
             return None
 
-    def read_json_from_s3(self, bucket, key):
+    def read_json_from_s3(self, key):
         """
         Reads a JSON file from an S3 bucket and returns a Pandas DataFrame.
 
@@ -102,7 +91,7 @@ class S3DataLoader:
         - dataframe: Pandas dataframe containing the JSON data.
         """
         try:
-            response = self.s3_client.get_object(Bucket=bucket, Key=key)
+            response = self.client.get_object(Bucket=self.bucket_name, Key=key)
             json_data = response['Body'].read()
             dataframe = pd.read_json(BytesIO(json_data), encoding='utf-8')
             return dataframe
@@ -113,7 +102,7 @@ class S3DataLoader:
             print(f"Error reading JSON data from S3: {e}")
             return None
 
-    def read_parquet_from_s3(self, bucket, key):
+    def read_parquet_from_s3(self, key):
         """
         Reads a Parquet file from an S3 bucket and returns a Pandas DataFrame.
 
@@ -125,7 +114,7 @@ class S3DataLoader:
         - dataframe: Pandas dataframe containing the Parquet data.
         """
         try:
-            response = self.s3_client.get_object(Bucket=bucket, Key=key)
+            response = self.client.get_object(Bucket=self.bucket_name, Key=key)
             parquet_data = response['Body'].read()
             table = pq.read_table(BytesIO(parquet_data))
             dataframe = table.to_pandas()
@@ -137,7 +126,7 @@ class S3DataLoader:
             print(f"Error reading Parquet data from S3: {e}")
             return None
 
-    def read_data_from_s3(self, bucket, key, file_type):
+    def read_data_from_s3(self, key, file_type):
         """
         Reads data from an S3 bucket by file type, returns a Pandas DataFrame.
 
@@ -150,11 +139,11 @@ class S3DataLoader:
         - dataframe: Pandas dataframe containing the file data.
         """
         if file_type.lower() == "csv":
-            return self.read_csv_from_s3(bucket, key)
+            return self.read_csv_from_s3(self.bucket_name, key)
         if file_type.lower() == "json":
-            return self.read_json_from_s3(bucket, key)
+            return self.read_json_from_s3(self.bucket_name, key)
         if file_type.lower() == "parquet":
-            return self.read_parquet_from_s3(bucket, key)
+            return self.read_parquet_from_s3(self.bucket_name, key)
 
         print("Unsupported file type. Choose 'csv', 'json', or 'parquet'.")
         return None
