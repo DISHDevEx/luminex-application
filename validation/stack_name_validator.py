@@ -1,5 +1,6 @@
 import sys
 import boto3
+import os
 
 def stack_exists(input_stack_name):
     cf_client = boto3.client('cloudformation')
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         print("Error: Stack name not provided.")
         sys.exit(1)
 
-    input_stack_name = sys.argv[1]
+    input_stack_name = os.getenv(stack-name)
 
     # AWS CloudFormation Stack Existence Check
     if stack_exists(input_stack_name):
