@@ -6,7 +6,7 @@
     "file_path" : "data-source/transformations/main.py",
     "access_token": "xxx",
     "permissions": {
-        "StackSet-xxx": [
+        "StackSet-xx enter stack name xx": [
             "IAMFullAccess",
             "AmazonS3FullAccess"
         ]
