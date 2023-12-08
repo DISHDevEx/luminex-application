@@ -25,7 +25,7 @@ def stack_exists(input_stack_name):
         if 'does not exist' in str(e):
             return False  # Stack does not exist
         else:
-            raise  # Some other error
+            raise Exception("Value error")
 
 if __name__ == "__main__":
 
