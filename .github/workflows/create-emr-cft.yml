@@ -55,19 +55,3 @@ jobs:
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             | jq -r '.StackId')
           echo "CloudFormation stack ID: $stack_id"
-
-      - name: Wait for stack creation completion
-        run: |
-          aws cloudformation wait stack-create-complete --stack-name ${{ github.event.client_payload.inputs.stack-name }}
-
-      - name: Extract EMR Cluster ID
-        id: extract-cluster-id
-        run: |
-          emr_cluster_id=$(aws cloudformation describe-stacks --stack-name testing-cft-template-parameterupdatedx \
-            | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "EMRClusterIdOutput") | .OutputValue')
-          echo "EMR Cluster ID: $emr_cluster_id"
-        shell: bash
-
-      - name: Set outputs
-        id: set-outputs
-        run: echo "::set-output name=emr-cluster-id::${{ steps.extract-cluster-id.outputs.emr-cluster-id }}"

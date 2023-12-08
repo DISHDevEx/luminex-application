@@ -2,5 +2,6 @@
   "GITHUB_ORGANIZATION": "DISHDevEx",
   "GITHUB_REPOSITORY": "luminex-application",
   "GITHUB_WORKFLOW": "create-emr-cft.yml",
-  "GITHUB_EVENT_TYPE": "create-emr-cft"
+  "GITHUB_EVENT_TYPE": "create-emr-cft",
+  "aws_region": "us-east-1"
 }
