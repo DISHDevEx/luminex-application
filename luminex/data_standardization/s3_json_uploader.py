@@ -1,52 +1,26 @@
-"""
-S3 Data Uploader
-
-This script defines a class, `S3DataUploader`, responsible for uploading a Pandas DataFrame to an Amazon S3 bucket. The script uses a separate S3 client creation function from `s3_utils` and includes functionality to convert the DataFrame to JSON before uploading it to the specified S3 bucket.
-
-- Importing necessary modules:
-  - `S3DataLoader`: A class for reading data from S3 buckets.
-  - `create_s3_client`: A function for creating an S3 client using configuration details.
-  - Other standard libraries: `sys`, `os`, `urllib3`, and `pandas`.
-
-- Setting up the Python path:
-  The script adds the parent directory to the Python path to import modules from the parent directory.
-
-- Reading a local CSV file into a Pandas DataFrame:
-  The script reads a CSV file from a local path into a Pandas DataFrame (`df`). This local DataFrame will be used for testing and uploading to S3.
-
-- Class Definition: `S3DataUploader`:
-  - `s3_client`: A class-level attribute storing the S3 client instance created using `create_s3_client`.
-  - `convert_df_to_json`: A method to convert a Pandas DataFrame to JSON format.
-  - `upload_json_data_to_s3`: A method to upload JSON data to the specified S3 bucket and key.
-  - `main`: The main method that interacts with the user, reads data, converts it to JSON, and uploads it to S3.
-
-- Execution Block:
-  The script creates an instance of `S3DataUploader` and calls its `main` method, initiating the interaction with the user for S3 bucket details and uploading the local DataFrame in JSON format to the specified location in the S3 bucket.
-
-Note: The commented-out section loading data from S3 using `S3DataLoader` is preserved for reference and can be used for fetching data from an S3 bucket instead of reading a local file.
-"""
 import sys
 import os
 import urllib3
+import boto3
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from s3_utils import S3Utils
 
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class S3DataUploader:
 
-    def __init__(self):
+    def __init__(self, bucket_name=None):
         """
-        Initialize S3DataUploader with an S3 client using configured credentials.
+        Initialize S3DataLoader with an S3 client using configured credentials.
 
         Parameters:
         - None
         """
-        self.s3_utils_instance = S3Utils()
+        self.bucket_name = bucket_name
+        self.client = boto3.client('s3')
+        self.resource = boto3.resource('s3')
     
     def convert_df_to_json(self, df):
         """
@@ -73,19 +47,15 @@ class S3DataUploader:
 
         """
         json_bytes = str.encode(json_data)
-        s3_client = self.s3_utils_instance.create_s3_client()
-
         print("\n****-----Data successfully standardized to json-----****")
-        s3_client.put_object(Bucket=bucket_name, Key = f'{s3_key}/{file_name}', Body=json_bytes)
+        self.client.put_object(Bucket=bucket_name, Key = f'{s3_key}/{file_name}', Body=json_bytes)
         print(f'DataFrame has been standardized to json and uploaded to S3://{bucket_name}/{s3_key}/{file_name}')
         return json_bytes
 
-    def main(self):
+    def main(df,self):
         """
         Interacts with the user, reads S3 data, and converts to json and displays json data info.
         """
-        
-        print(df.info())
         #destination
         bucket_name = input("Enter the S3 bucket name: ")
         file_name_without_extension = input("Enter the file name (without extension): ")

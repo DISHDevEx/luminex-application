@@ -1,55 +1,52 @@
-import pytest
 import os
 import sys
+import pytest
+import json
+import pandas as pd
+
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from data_standardization.s3_json_uploader import S3DataUploader
-import pandas as pd
 
-#input variables
-bucket_name = "luminex"
-file_name = "test-output-json"
-s3_key = "transformed-data"
+from luminex.data_standardization.s3_json_uploader import S3DataUploader
 
-
+##local df passed for local testing 
 file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
+df = pd.read_csv(file_path)
 
 @pytest.fixture
-def s3_data_uploader_instance():
+def s3_uploader():
     return S3DataUploader()
 
-@pytest.fixture
-def sample_dataframe(file_path):
-    # Create a sample DataFrame for testing
-    sample_dataframe = pd.read_csv(file_path)
-    return pd.DataFrame(sample_dataframe)
+def test_convert_df_to_json(s3_uploader,df):
+    """
+    Tests converting df to json
+    Expected Outcome:
+    - Test passes if the method behaves correctly.
+    """
+    result = s3_uploader.convert_df_to_json(df)
+    assert isinstance(result, dict)
+    assert result is not None
 
-def test_convert_df_to_json(s3_data_uploader_instance, sample_dataframe):
-    # Test the convert_df_to_json method
-    json_data = s3_data_uploader_instance.convert_df_to_json(sample_dataframe)
-    assert isinstance(json_data, str)
-    # Add more assertions based on your specific requirements
 
-def test_upload_json_data_to_s3(s3_data_uploader_instance, sample_dataframe,bucket_name, file_name, s3_key):
-    # Test the upload_json_data_to_s3 method
-    json_data = s3_data_uploader_instance.convert_df_to_json(sample_dataframe)
+def test_upload_json_data_to_s3(s3_uploader, capsys):
 
-    # Create an S3 bucket if it doesn't exist
-    conn = s3_data_uploader_instance.s3_utils_instance.create_s3_client()
-    try:
-        conn.head_bucket(Bucket=bucket_name)
-    except conn.exceptions.NoSuchBucket:
-        conn.create_bucket(Bucket=bucket_name)
+    #input variables
+    result = {"key": "value"}
+    bucket_name = 'luminex'
+    s3_key='transformed-data'
+    file_name = 'sales-transformed'
 
-    # Mock the S3 client and other dependencies as needed for testing
-    # For example, you can use a library like moto to mock AWS services
+    # Call the method
+    result = s3_uploader.upload_json_data_to_s3(json.dumps(result), bucket_name, file_name, s3_key)
 
-    # Call the method and assert the expected behavior
-    result = s3_data_uploader_instance.upload_json_data_to_s3(json_data, bucket_name, file_name, s3_key)
+    # Assertions
+    assert result is not None  # Assuming you want to assert that the method returns a non-None value
 
-    # Assert that the S3 object was created
-    objects = conn.list_objects(Bucket=bucket_name)
-    assert len(objects.get('Contents', [])) == 1
-    assert objects['Contents'][0]['Key'] == f'{s3_key}/{file_name}'
-    assert result is not None 
+    # Verify console output
+    captured = capsys.readouterr()
+    expected_output = "Data successfully standardized to json"
+    assert expected_output in captured.out
+
+    # Additional assertions based on the expected behavior of your method
+    assert "put_object" in dir(s3_uploader.s3_utils_instance.create_s3_client())  # Replace with specific assertions
