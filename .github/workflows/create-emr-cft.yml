@@ -40,10 +40,13 @@ jobs:
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
-          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: samplerolesession
+          aws-region: ${{ env.AWS_REGION }}
+#          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
+#          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
+#          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
+#          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
 
       - name: Deploy EMR cluster
         run: |

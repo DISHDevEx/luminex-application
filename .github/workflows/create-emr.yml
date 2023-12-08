@@ -36,10 +36,9 @@ jobs:
       id: creds
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ github.event.inputs.AWS_Region || 'us-east-1' }}
+        role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+        role-session-name: samplerolesession
+        aws-region: ${{ env.AWS_REGION }}
 
 
     - name: Create EMR cluster
