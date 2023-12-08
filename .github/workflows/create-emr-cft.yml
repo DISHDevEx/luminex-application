@@ -1,9 +1,6 @@
 name: Deploy EMR Cluster using CFT template
 
 on:
-  push:
-    branches:
-      - prashanth/stack-name
   repository_dispatch:
     types: [create-emr-cft]
 
@@ -43,22 +40,22 @@ jobs:
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN}}
-          aws-region: ${{ secrets.AWS_Region || 'us-east-1'}}
+          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
+          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
+          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+
       - name: Install Boto3
         run: pip install boto3
 
       
       - name: Validate Stack
         env:
-          
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ secrets.AWS_Region || 'us-east-1' }}
-          stack-name: ${{ secrets.INPUT_STACK_NAME}}
+          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
+          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
+          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          stack-name: ${{github.event.client_payload.inputs.stack-name}}
         run: |
           echo $stack-name
           python validation/stack_name_validator.py

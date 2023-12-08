@@ -4,6 +4,18 @@ import boto3
 import os
 
 def stack_exists(input_stack_name):
+    """
+    Checks the existence of an AWS CloudFormation stack.
+
+    Parameters:
+    - input_stack_name (str): The name of the CloudFormation stack to check.
+
+    Returns:
+    - bool: True if the stack exists, False if it does not.
+
+    Raises:
+    - botocore.exceptions.ClientError: If an unexpected error occurs during the AWS API call.
+    """
     cf_client = boto3.client('cloudformation')
 
     try:
@@ -16,8 +28,6 @@ def stack_exists(input_stack_name):
             raise  # Some other error
 
 if __name__ == "__main__":
-    # Check if the stack name is provided as a command-line argument
-
 
     input_stack_name = os.getenv('stack-name')
     print(input_stack_name)
