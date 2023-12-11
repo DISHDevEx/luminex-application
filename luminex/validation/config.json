@@ -3,10 +3,10 @@
     "destination_bucket": "xxx",
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
-    "file_path" : "data-source/transformations/main.py",
+    "file_path" : "xxx",
     "access_token": "xxx",
     "permissions": {
-        "StackSet-xx enter stack name xx": [
+        "StackSet-luminex-test-stack": [
             "IAMFullAccess",
             "AmazonS3FullAccess"
         ]

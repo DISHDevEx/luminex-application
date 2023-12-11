@@ -1,5 +1,82 @@
 import requests
 import json
+import time
+import boto3
+
+def get_stack_outputs(stack_name, region,aws_access_key_id, aws_secret_access_key, aws_session_token):
+    """
+    Returns the EMR cluster ID.
+
+            Parameters:
+                    stack_name (str): The name of the cloudformation stack
+                    region (str): The aws region from where the output has to be fetched
+                    aws_access_key_id (str): AWS Temp Credentials: Access Key ID
+                    aws_secret_access_key (str): AWS Temp Credentials: Secret Access Key
+                    aws_session_token (str): AWS Temp Credentials: Session Token
+
+            Returns:
+                    EMR Cluster ID (str): It returns the output of the stack i.e. EMR Cluster ID to the trigger_workflow function
+    """
+    client = boto3.client('cloudformation', region_name=region, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
+
+    try:
+        stack = client.describe_stacks(StackName=stack_name)
+        outputs = stack['Stacks'][0]['Outputs']
+
+        return {output['OutputKey']: output['OutputValue'] for output in outputs}
+
+    except client.exceptions.ClientError as e:
+        print(f"Error getting stack outputs: {e}")
+        return {}
+
+
+def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, max_retries=5, retry_delay=10, initial_delay=900):
+    """
+    Returns the EMR cluster ID.
+
+            Parameters:
+                    stack_name (str): The name of the cloudformation stack
+                    aws_region (str): The aws region from where the output has to be fetched
+                    aws_access_key_id (str): AWS Temp Credentials: Access Key ID
+                    aws_secret_access_key (str): AWS Temp Credentials: Secret Access Key
+                    aws_session_token (str): AWS Temp Credentials: Session Token
+                    max_retries (int): Max retries to trigger the AWS to check if the stack deployment is complete
+                    retry_delay (int): Delay seconds between each retry
+                    initial_delay (int): The initial delay in seconds before checking on the stack creation
+
+            Returns:
+                    If the stack creation has been successful or not
+    """
+    # Initial waiting period before starting retries
+    print(f"Waiting for stack {stack_name} to be created...")
+    time.sleep(initial_delay)
+    client = boto3.client('cloudformation', region_name=aws_region, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
+
+    # Retry fetching the EMR Cluster ID with a delay in case of 404 errors
+    for retry_count in range(max_retries):
+        try:
+            stack = client.describe_stacks(StackName=stack_name)
+            status = stack['Stacks'][0]['StackStatus']
+
+            if status.endswith('COMPLETE'):
+                print(f"Stack {stack_name} creation complete.")
+                return True
+
+            elif status.endswith('ROLLBACK'):
+                print(f"Stack {stack_name} creation failed.")
+                return False
+
+        except client.exceptions.ClientError as e:
+            if 'does not exist' in str(e):
+                pass  # Stack doesn't exist yet, continue waiting
+            else:
+                raise
+
+        print(f'Retry {retry_count + 1}/{max_retries}. Waiting {retry_delay} seconds before retrying...')
+        time.sleep(retry_delay)
+
+    print(f'Exceeded maximum retries. Failed to retrieve EMR Cluster ID. Please check the logs for more information.')
+    return None
 
 def read_config(file_path='../config/infra_config.json'):
 
@@ -16,8 +93,8 @@ def read_config(file_path='../config/infra_config.json'):
     with open(file_path, 'r') as config_file:
         config_data = json.load(config_file)
     return config_data
-
-def trigger_workflow(organization, repository, workflow_name, event_type, token, inputs=None):
+#
+def trigger_workflow(organization, repository, workflow_name, event_type, aws_region, token, inputs=None):
 
     """
     Triggers the github actions to create the AWS infrastructure for Luminex.
@@ -31,11 +108,14 @@ def trigger_workflow(organization, repository, workflow_name, event_type, token,
                     inputs (dict): The inputs variables that needs to be passed to the github action
 
             Returns:
-                    status_code (int): The code that explains the status of the trigger action.
+                    Returns the EMR Cluster ID
     """
 
     url = f'https://api.github.com/repos/{organization}/{repository}/dispatches'
-    print(url)
+    stack_name = inputs['stack-name']
+    aws_access_key_id = inputs['AWS_ACCESS_KEY_ID']
+    aws_secret_access_key = inputs['AWS_SECRET_ACCESS_KEY']
+    aws_session_token = inputs['AWS_SESSION_TOKEN']
     headers = {
         'Accept': 'application/vnd.github.everest-preview+json',
         'Authorization': f'Bearer {token}',
@@ -51,18 +131,25 @@ def trigger_workflow(organization, repository, workflow_name, event_type, token,
     }
 
     response = requests.post(url, headers=headers, data=json.dumps(payload), verify=False)
-    print(payload)
-
     print(f'Response status code: {response.status_code}')
     print(f'Response content: {response.text}')
 
     if response.status_code == 204:
-        print(f'Success! Triggered workflow "{workflow_name}" in repository "{organization}/{repository}".')
+        print('Workflow triggered successfully.')
     else:
-        print(f'Failed to trigger workflow.')
+        print(f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, Content: {response.text}')
+        return None
 
-    return response.status_code
+    if fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token):
+        outputs = get_stack_outputs(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token)
+        print("Stack Outputs:")
+        for key, value in outputs.items():
+            print(f"Infra has been set.{key}: {value} ")
+    else:
+        print("Failed to create the stack.")
 
+    return None
+#
 def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN ):
 
     """
@@ -85,6 +172,7 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
     repository_name = config.get('GITHUB_REPOSITORY', 'your-username/your-repo')
     workflow_name = config.get('GITHUB_WORKFLOW', 'name-of-your-workflow')
     event_type = config.get('GITHUB_EVENT_TYPE', 'type-of-the-github-workflow-event')
+    aws_region = config.get('aws_region', 'aws-region')
     personal_access_token = pat
 
 
@@ -95,5 +183,4 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
         'AWS_SESSION_TOKEN': AWS_SESSION_TOKEN
     }
 
-    trigger_workflow(organization_name, repository_name, workflow_name, event_type, personal_access_token, workflow_inputs)
-
+    trigger_workflow(organization_name, repository_name, workflow_name, event_type, aws_region, personal_access_token, workflow_inputs)
