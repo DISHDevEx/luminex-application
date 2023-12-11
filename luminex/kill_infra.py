@@ -1,6 +1,6 @@
 """
-kill_infra.py: Terminate an Amazon EMR cluster based on user-specified time.
-Sleeps until specified time before terminating EMR cluster
+Terminates an Amazon EMR cluster based on user-specified time.
+Sleeps until specified time before terminating EMR cluster.
 """
 from datetime import datetime
 import time
