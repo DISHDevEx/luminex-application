@@ -2,7 +2,7 @@ import sys
 import os
 import urllib3
 import boto3
-
+import pandas as pd
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -52,7 +52,7 @@ class S3DataUploader:
         print(f'DataFrame has been standardized to json and uploaded to S3://{bucket_name}/{s3_key}/{file_name}')
         return json_bytes
 
-    def main(df,self):
+    def main(self,df):
         """
         Interacts with the user, reads S3 data, and converts to json and displays json data info.
         """
@@ -63,10 +63,15 @@ class S3DataUploader:
         file_name = file_name_without_extension + '.json'
         s3_key = input(f"Enter S3 key for the {file_name} file:")
         json_data = self.convert_df_to_json(df)
+        print(type(json_data))
         #upload json data to s3
         self.upload_json_data_to_s3(json_data,bucket_name,file_name,s3_key)
 
 if __name__ == "__main__":
 
+    # data_loader = S3DataLoader()
+    # df = data_loader.main()
+    file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
+    df = pd.read_csv(file_path)
     data_uploader = S3DataUploader()
-    data_uploader.main()
+    data_uploader.main(df)
