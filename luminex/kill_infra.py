@@ -1,42 +1,78 @@
-import boto3
+"""
+kill_infra.py: Terminate an Amazon EMR cluster based on user-specified time.
+Sleeps until specified time before terminating EMR cluster
+"""
 from datetime import datetime
+import time
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 
-def terminate_emr_cluster(emr_client, cluster_id):
+def terminate_emr_cluster(cluster_id):
+    """
+    Terminate an EMR cluster.
+
+    Parameters:
+        cluster_id (str): The ID of the EMR cluster to terminate.
+    """
+    emr = boto3.client('emr')
+
     try:
-        emr_client.terminate_job_flows(JobFlowIds=[cluster_id])
-        print(f"Cluster {cluster_id} terminated successfully.")
-    except Exception as e:
-        print(f"Error terminating cluster {cluster_id}: {str(e)}")
+        emr.terminate_job_flows(JobFlowIds=[cluster_id])
+        print(f"EMR cluster {cluster_id} terminated successfully.")
+    except BotoCoreError as e:
+        print(f"BotoCoreError terminating EMR cluster {cluster_id}: {str(e)}")
+    except ClientError as e:
+        print(f"ClientError terminating EMR cluster {cluster_id}: {str(e)}")
 
-def get_user_input():
-    cluster_id = input("Enter the EMR cluster ID to terminate: ")
-    termination_time_str = input("Enter the termination time (in format YYYY-MM-DD HH:MM:SS): ")
+def wait_and_terminate(cluster_id, termination_time):
+    """
+    Sleeps until specified time before terminating EMR cluster.
 
+    Parameters:
+        cluster_id (str): The ID of the EMR cluster to terminate.
+        termination_time (datetime): The time to terminate the EMR cluster.
+    """
     try:
-        termination_time = datetime.strptime(termination_time_str, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        print("Invalid date format. Please use the format YYYY-MM-DD HH:MM:SS.")
-        return None, None
-
-    return cluster_id, termination_time
-
-if __name__ == "__main__":
-    # Assuming you have AWS credentials properly configured
-    emr_client = boto3.client("emr", region_name="your-region")
-
-    cluster_id, termination_time = get_user_input()
-
-    if cluster_id and termination_time:
         current_time = datetime.now()
         time_difference = termination_time - current_time
 
-        if time_difference.total_seconds() > 0:
-            print(f"Cluster termination scheduled at {termination_time}.")
-            print(f"Waiting for {time_difference.total_seconds()} seconds...")
-            emr_client.get_waiter('cluster_terminated').wait(
-                ClusterId=cluster_id,
-                WaiterConfig={'Delay': 30, 'MaxAttempts': int(time_difference.total_seconds() / 30)}
-            )
-            terminate_emr_cluster(emr_client, cluster_id)
-        else:
-            print("Invalid termination time. It should be a future time.")
+        if time_difference.total_seconds() <= 0:
+            raise ValueError("Termination time should be in the future.")
+
+        print(f"EMR cluster {cluster_id} will be terminated at {termination_time}.")
+        print(f"Waiting for {time_difference} seconds before termination...")
+
+        time.sleep(time_difference.total_seconds())
+        terminate_emr_cluster(cluster_id)
+
+    except ValueError as ve:
+        print(f"ValueError: {str(ve)}")
+    except ConnectionError as ce:
+        print(f"ConnectionError: {str(ce)}")
+
+def get_user_input():
+    """
+    Get user input for the EMR cluster ID and termination time.
+
+    Returns:
+        tuple: EMR cluster ID and termination time.
+    """
+    try:
+        cluster_id = input("Enter the EMR cluster ID: ")
+        termination_time_str = input("Enter the termination time (YYYY-MM-DD HH:MM:SS): ")
+        termination_time = datetime.strptime(termination_time_str, "%Y-%m-%d %H:%M:%S")
+        return cluster_id, termination_time
+    except ValueError:
+        print("Invalid date/time format. Please use the format 'YYYY-MM-DD HH:MM:SS'.")
+        return None
+
+def run():
+    """
+    Execute the main functionality of the script.
+    """
+    cluster_id, termination_time = get_user_input()
+    if cluster_id and termination_time:
+        wait_and_terminate(cluster_id, termination_time)
+
+if __name__ == "__main__":
+    run()
