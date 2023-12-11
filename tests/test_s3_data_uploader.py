@@ -15,15 +15,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from luminex.data_standardization.s3_json_uploader import S3DataUploader
 
-##local df passed for local testing 
-# BUCKET_NAME = os.getenv("BUCKET_NAME_PYTEST")
-# S3_KEY = os.getenv("S3_KEY_PYTEST")
-# FILE_NAME = os.getenv("FILE_NAME_PYTEST")
 
 BUCKET_NAME = 'luminex'
 S3_KEY = 'transformed-data'
 FILE_NAME = 'standardized-df.json'
-FILE_PATH = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
+FILE_PATH = r'xxx'
 df = pd.read_csv(FILE_PATH)
 
 def test_convert_df_to_json(s3_uploader):
@@ -62,12 +58,6 @@ def test_upload_json_data_to_s3(s3_uploader):
         else:
             # Raise the exception if it's a different error
             raise
-
-    # # Check if the file exists in S3
-    # response = s3_client.head_object(Bucket=BUCKET_NAME, Key=S3_KEY)
-    # print(response)
-    # assert response is not None
-
 
     # Additional assertions based on the expected behavior of your method
     # Replace the above assertion with specific assertions that make sense for your use case

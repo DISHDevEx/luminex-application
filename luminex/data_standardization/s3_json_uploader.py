@@ -69,7 +69,7 @@ class S3DataUploader:
 
 if __name__ == "__main__":
 
-    file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
+    file_path = r'xxx'
     df = pd.read_csv(file_path)
     data_uploader = S3DataUploader()
     data_uploader.main(df)
