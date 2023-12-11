@@ -4,3 +4,4 @@ boto3>=1.26.29
 fastparquet>=0.8.1
 pyarrow>=11.0.0
 python-dotenv
+requests
