@@ -6,4 +6,3 @@ pyarrow>=11.0.0
 python-dotenv
 requests
 pyyaml>=6.0.1
-json
