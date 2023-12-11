@@ -7,6 +7,7 @@ import os
 import pytest
 from dotenv import load_dotenv
 from luminex import S3DataLoader
+from luminex import S3DataUploader
 
 load_dotenv()
 
@@ -60,3 +61,13 @@ def s3_loader(bucket_name):
     - s3_loader (S3DataLoader): An instance of the S3DataLoader class.
     """
     return S3DataLoader(bucket_name=bucket_name)
+
+@pytest.fixture(scope="module")
+def s3_uploader(bucket_name):
+    """
+    Create and return an instance of the S3DataLoader class.
+
+    Returns:
+    - s3_loader (S3DataLoader): An instance of the S3DataLoader class.
+    """
+    return S3DataUploader(bucket_name=bucket_name)

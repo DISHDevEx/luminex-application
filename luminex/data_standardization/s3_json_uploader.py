@@ -3,6 +3,7 @@ import os
 import urllib3
 import boto3
 import pandas as pd
+
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -58,9 +59,8 @@ class S3DataUploader:
         """
         #destination
         bucket_name = input("Enter the S3 bucket name: ")
-        file_name_without_extension = input("Enter the file name (without extension): ")
-        # Append '.json' extension to the provided file name
-        file_name = file_name_without_extension + '.json'
+        file_name = input("Enter the file name (without extension): ")
+        # user should Append '.json' extension to the provided file name
         s3_key = input(f"Enter S3 key for the {file_name} file:")
         json_data = self.convert_df_to_json(df)
         print(type(json_data))
@@ -69,8 +69,6 @@ class S3DataUploader:
 
 if __name__ == "__main__":
 
-    # data_loader = S3DataLoader()
-    # df = data_loader.main()
     file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
     df = pd.read_csv(file_path)
     data_uploader = S3DataUploader()
