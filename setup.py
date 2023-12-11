@@ -11,7 +11,8 @@ setup(
     url='',
     license='Dish Wireless',
     packages=find_packages(include=['luminex',
-                                    'luminex.data_standardization'
+                                    'luminex.data_standardization',
+                                    'luminex.validation'
                                     ]),
     include_package_data=True,
     install_requires = [
