@@ -1,6 +1,6 @@
 from input_validator import InputValidator
 from transformation_file_validation import ETLFileValidator
-from permissions_validator import IAMRoleValidator
+from rolename_permissions_validator import IAMRoleValidator
 
 if __name__ == "__main__":
     # Create an instance of the InputValidator class
