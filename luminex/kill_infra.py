@@ -59,7 +59,13 @@ def get_user_input():
     """
     try:
         cluster_id = input("Enter the EMR cluster ID: ")
-        termination_time_str = input("Enter the termination time (YYYY-MM-DD HH:MM:SS): ")
+        termination_time_str = input(
+            "Enter the termination time (YYYY-MM-DD HH:MM:SS, "
+            "press Enter to terminate immediately): ")
+
+        if not termination_time_str:
+            return cluster_id, None
+
         termination_time = datetime.strptime(termination_time_str, "%Y-%m-%d %H:%M:%S")
         return cluster_id, termination_time
     except ValueError:
@@ -71,8 +77,12 @@ def run():
     Execute the main functionality of the script.
     """
     cluster_id, termination_time = get_user_input()
-    if cluster_id and termination_time:
-        wait_and_terminate(cluster_id, termination_time)
+
+    if cluster_id:
+        if termination_time:
+            wait_and_terminate(cluster_id, termination_time)
+        else:
+            terminate_emr_cluster(cluster_id)
 
 if __name__ == "__main__":
     run()
