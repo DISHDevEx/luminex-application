@@ -57,7 +57,7 @@ jobs:
           stack-name: ${{github.event.client_payload.inputs.stack-name}}
         run: |
           echo $stack-name
-          python validation/stack_name_validator.py
+          python luminex/validation/stack_name_validator.py
       
       - name: Deploy EMR cluster
         run: |
