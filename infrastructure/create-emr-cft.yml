@@ -422,7 +422,7 @@ Resources:
       - !If [Zeppelin, Name: Zeppelin, !Ref AWS::NoValue]
       - !If [ZooKeeper, Name: ZooKeeper, !Ref AWS::NoValue]
       AutoScalingRole: !Ref EMRAutoScalingRole
-      LogUri: s3://luminex/emr-logs/
+      LogUri: s3://luminex-s3-test/emr-logs/
       AutoTerminationPolicy:
         IdleTimeout: !Ref EMRIdealTimeOut
       BootstrapActions:
