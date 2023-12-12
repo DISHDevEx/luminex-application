@@ -43,7 +43,7 @@ Parameters:
   EMRClusterName:
     Description: The name of the EMR Cluster
     Type: String
-    Default: "luminex-emr-cft-test-new"
+    Default: "luminex-emr-cft"
   EMRCustomAmiId:
     Description: The custom AMI Id for Operating Systems
     Type: String
@@ -87,7 +87,7 @@ Parameters:
   EMRStepConcurrencyLevel:
     Description: Specifies the number of steps that can be executed concurrently
     Type: Number
-    Default: 1
+    Default: 100
     MinValue: 1
     MaxValue: 256
   EMRSecurityConfiguration:
