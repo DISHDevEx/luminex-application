@@ -59,11 +59,10 @@ class S3DataUploader:
         """
         #destination
         bucket_name = input("Enter the S3 bucket name: ")
-        file_name = input("Enter the file name (without extension): ")
+        file_name = input("Enter the file name (with .json extension): ")
         # user should Append '.json' extension to the provided file name
         s3_key = input(f"Enter S3 key for the {file_name} file:")
         json_data = self.convert_df_to_json(df)
-        print(type(json_data))
         #upload json data to s3
         self.upload_json_data_to_s3(json_data,bucket_name,file_name,s3_key)
 
