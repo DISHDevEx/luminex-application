@@ -6,9 +6,16 @@
     "file_path" : "xxx",
     "access_token": "xxx",
     "permissions": {
-        "StackSet-luminex-test-stack": [
+        "StackSet-Role": [
             "IAMFullAccess",
             "AmazonS3FullAccess"
+        ],
+        "EMR_DefaultRole": [
+            "AmazonEC2FullAccess",
+            "AmazonElasticMapReduceRole",
+            "AmazonS3FullAccess",
+            "SecretsManagerReadWrite",
+            "AmazonEMRFullAccessPolicy_v2"
         ]
       }
 }

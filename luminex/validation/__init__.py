@@ -1,3 +1,3 @@
 from .input_validator import InputValidator
 from .transformation_file_validation import ETLFileValidator
-from .permissions_validator import IAMRoleValidator
+from .rolename_permissions_validator import IAMRoleValidator
