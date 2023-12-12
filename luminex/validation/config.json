@@ -1,10 +1,10 @@
 {
-    "source_bucket": "luminex-s3-test",
-    "destination_bucket": "maria-input-test",
+    "source_bucket": "xxx",
+    "destination_bucket": "xxx",
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
-    "file_path" : "data-source/transformations/transformations1.py",
-    "access_token": "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",
+    "file_path" : "xxx",
+    "access_token": "xxx",
     "permissions": {
         "StackSet-EMR-Role": [
             "CloudWatchFullAccess",
