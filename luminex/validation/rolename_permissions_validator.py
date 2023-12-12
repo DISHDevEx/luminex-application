@@ -17,7 +17,7 @@ class IAMRoleValidator:
     def is_valid_role_name_format(self, role_name):
         # Check if the role name adheres to the specified format
         # The role name should start with "StackSet" or "EMR" and end with "Role"
-        pattern = re.compile(r'^(StackSet|EMR)[a-zA-Z0-9_]+Role$')
+        pattern = re.compile(r'^(StackSet|EMR)[-a-zA-Z0-9_]+Role$')
         return bool(re.match(pattern, role_name))
 
     def validate_roles(self):
