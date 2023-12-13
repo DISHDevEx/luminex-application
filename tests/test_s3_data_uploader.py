@@ -16,7 +16,7 @@ from luminex import S3DataUploader
 BUCKET_NAME = 'luminex'
 S3_KEY = 'transformed-data'
 FILE_NAME = 'standardized-df.json'
-FILE_PATH = 'XXX'
+FILE_PATH = '/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
 df = pd.read_csv(FILE_PATH)
 
 def test_convert_df_to_json(s3_uploader):
