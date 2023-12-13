@@ -24,7 +24,7 @@ class S3DataUploader:
         self.client = boto3.client('s3')
         self.resource = boto3.resource('s3')
     
-    def convert_df_to_json(self, df_spark):
+    def convert_df_to_json(self, df):
         """
         Converts Pandas DataFrame to JSON.
 
@@ -74,7 +74,7 @@ class S3DataUploader:
 if __name__ == "__main__":
 
     spark = SparkSession.builder.appName("luminex").getOrCreate()
-    file_path = r'/Users/madhu.bandi/Downloads/transformed_sales_data.csv'
+    file_path = r'xxx'
     df = spark.read.csv(file_path,header=True,inferSchema=True)
     data_uploader = S3DataUploader()
     data_uploader.main(df)
