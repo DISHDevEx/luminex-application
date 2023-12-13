@@ -12,15 +12,15 @@ from config import aws_config
 
 class S3DataLoader:
     """
-    Class to create pyspark dataframe for nested input JSON and standard JSON,
-    convert JSON to dataframe and create a report for missing attributes in input JSON
+    This class Manages interaction with S3, reads CSV, JSON, or Parquet files,
+    and converts data to a PySpark dataframe.
     """
     def __init__(self):
         """
         Create a Spark session
-        PARAMETERS:
+        Parameters:
             self
-        RETURNS:
+        Returns:
             None
         """
         self.spark = SparkSession.builder\
@@ -43,7 +43,6 @@ class S3DataLoader:
             df: A Spark DataFrame representing the CSV data.
         """
         df = self.spark.read.csv(bucket_folder_path, header=True, inferSchema=True)
-        df.show()
         self.spark.stop()
 
         return df
@@ -58,7 +57,7 @@ class S3DataLoader:
         Returns:
             df: A Spark DataFrame representing the JSON data.
         """
-        df = self.spark.read.option("mode", "PERMISSIVE").json(bucket_folder_path)
+        df = self.spark.read.json(bucket_folder_path, multiLine=True)
         self.spark.stop()
 
         return df
@@ -74,7 +73,6 @@ class S3DataLoader:
             df: A Spark DataFrame representing the Parquet data.
         """
         df = self.spark.read.parquet(bucket_folder_path)
-        df.show()
         self.spark.stop()
 
         return df
