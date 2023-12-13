@@ -5,7 +5,6 @@ It also defines the configurations for pytest.
 """
 import os
 import pytest
-import pyspark 
 
 from luminex import S3DataLoader
 from luminex import S3DataUploader
