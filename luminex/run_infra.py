@@ -1,3 +1,5 @@
+from validation import IAMRoleValidator
+import os
 import requests
 import json
 import time
@@ -166,6 +168,12 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
                     Calls the trigger workflow function with required parameters (From config file: organization_name, repository_name
                     workflow_name, event_type, From user: personal_access_token, workflow_inputs)
     """
+
+    # Validation logic
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, 'validation', 'config.json')
+    permissions_validator = IAMRoleValidator(config_path, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
+    permissions_validator.validate_roles()
 
     config = read_config('../config/infra_config.json')
     organization_name = config.get('GITHUB_ORGANIZATION', 'your-organization')
