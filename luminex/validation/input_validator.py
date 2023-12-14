@@ -2,13 +2,17 @@ import boto3
 import json
 
 class InputValidator:
-    def __init__(self, config_file):
+    def __init__(self, config_file, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN):
         # Read configuration from the provided config file
         self.config = self.read_config(config_file)
-        
         # Extract source and destination bucket names from the configuration file
         self.source_bucket = self.config.get('source_bucket', '')
         self.destination_bucket = self.config.get('destination_bucket', '')
+
+        # AWS credentials
+        self.AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+        self.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+        self.AWS_SESSION_TOKEN = AWS_SESSION_TOKEN
 
     def read_config(self, file_path):
         # Read JSON configuration file
@@ -31,7 +35,9 @@ class InputValidator:
 
     def validate_s3_bucket(self, bucket_name, bucket_type):
         # Initialize the S3 client
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', aws_access_key_id= self.AWS_ACCESS_KEY_ID, 
+                                aws_secret_access_key= self.AWS_SECRET_ACCESS_KEY,
+                                aws_session_token = self.AWS_SESSION_TOKEN)
 
         try:
             # Check if the specified S3 bucket exists
