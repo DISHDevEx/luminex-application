@@ -98,8 +98,6 @@ class S3DataLoader:
         if bucket_folder_path.lower().endswith(".parquet"):
             s3_data_loader.read_parquet_to_df(bucket_folder_path)
 
-        print("Unsupported file format")
-
 def main():
     """
     Main function to initiate the S3 data processing.
