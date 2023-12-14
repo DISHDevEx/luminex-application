@@ -58,13 +58,11 @@ class S3DataUploader:
         self.client.put_object(Body=bytes_data, Bucket=bucket_name, Key=f'{s3_key}/{file_name}')
         print(f'DataFrame has been standardized to json and uploaded to S3://{bucket_name}/{s3_key}/{file_name}')
 
-    def main(self,df):
+    def main(self,df,bucket_name,file_name):
         """
         Interacts with the user, reads S3 data, and converts to json and displays json data info.
         """
         # #destination
-        bucket_name = input("Enter the S3 bucket name: ")
-        file_name = input("Enter the file name: ")
         s3_key = input(f"Enter S3 key for the {file_name} file:")
         json_data = self.convert_df_to_json(df)
         #upload json data to s3
