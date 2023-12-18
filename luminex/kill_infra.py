@@ -1,88 +1,88 @@
 """
-Terminates an Amazon EMR cluster based on user-specified time.
-Sleeps until specified time before terminating EMR cluster.
+This module defines a StackManager class for managing AWS CloudFormation stacks.
+It includes methods for checking the existence of a stack, deleting a stack, and
+running the stack deletion process.
 """
-from datetime import datetime
+import sys
 import time
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import ClientError
 
-def terminate_emr_cluster(cluster_id):
+class StackManager:
     """
-    Terminate an EMR cluster.
-
-    Parameters:
-        cluster_id (str): The ID of the EMR cluster to terminate.
+    A class for managing AWS CloudFormation stacks.
     """
-    emr = boto3.client('emr')
+    def __init__(self):
+        """
+        Initializes the StackManager with an AWS CloudFormation client.
+        """
+        self.cloudformation = boto3.client('cloudformation')
 
-    try:
-        emr.terminate_job_flows(JobFlowIds=[cluster_id])
-        print(f"EMR cluster {cluster_id} terminated successfully.")
-    except BotoCoreError as e:
-        print(f"BotoCoreError terminating EMR cluster {cluster_id}: {str(e)}")
-    except ClientError as e:
-        print(f"ClientError terminating EMR cluster {cluster_id}: {str(e)}")
+    def stack_exists(self, input_stack_name):
+        """
+        Check if a CloudFormation stack exists.
 
-def wait_and_terminate(cluster_id, termination_time):
-    """
-    Sleeps until specified time before terminating EMR cluster.
+        Args:
+            stack_name (str): The name of the stack.
 
-    Parameters:
-        cluster_id (str): The ID of the EMR cluster to terminate.
-        termination_time (datetime): The time to terminate the EMR cluster.
-    """
-    try:
-        current_time = datetime.now()
-        time_difference = termination_time - current_time
+        Returns:
+            bool: True if the stack exists, False otherwise.
+        """
+        try:
+            response = self.cloudformation.describe_stacks(StackName=input_stack_name)
+            exists = len(response['Stacks']) > 0
+            if exists:
+                print(f"Stack '{input_stack_name}' exists.")
+            return exists
 
-        if time_difference.total_seconds() <= 0:
-            raise ValueError("Termination time should be in the future.")
+        except self.cloudformation.exceptions.ClientError as e:
+            error_code = e.response['Error']['Code']
+            error_message = e.response['Error']['Message']
 
-        print(f"EMR cluster {cluster_id} will be terminated at {termination_time}.")
-        print(f"Waiting for {time_difference} seconds before termination...")
+            if error_code == 'ValidationError' and 'does not exist' in error_message:
+                print(f"Stack '{input_stack_name}' does not exist.")
+                return False
 
-        time.sleep(time_difference.total_seconds())
-        terminate_emr_cluster(cluster_id)
+            print(f"Error: {str(e)}")
+            return False
 
-    except ValueError as ve:
-        print(f"ValueError: {str(ve)}")
-    except ConnectionError as ce:
-        print(f"ConnectionError: {str(ce)}")
+    def delete_stack(self, input_stack_name):
+        """
+        Delete a CloudFormation stack.
 
-def get_user_input():
-    """
-    Get user input for the EMR cluster ID and termination time.
+        Args:
+            stack_name (str): The name of the stack.
+        """
+        try:
+            self.cloudformation.delete_stack(StackName=input_stack_name)
+            print(f"Stack deletion initiated. Stack Name: {input_stack_name}")
 
-    Returns:
-        tuple: EMR cluster ID and termination time.
-    """
-    try:
-        cluster_id = input("Enter the EMR cluster ID: ")
-        termination_time_str = input(
-            "Enter the termination time (YYYY-MM-DD HH:MM:SS, "
-            "press Enter to terminate immediately): ")
+            waiter = self.cloudformation.get_waiter('stack_delete_complete')
+            waiter.wait(StackName=input_stack_name)
 
-        if not termination_time_str:
-            return cluster_id, None
+            time.sleep(5)
 
-        termination_time = datetime.strptime(termination_time_str, "%Y-%m-%d %H:%M:%S")
-        return cluster_id, termination_time
-    except ValueError:
-        print("Invalid date/time format. Please use the format 'YYYY-MM-DD HH:MM:SS'.")
-        return None
+            if not self.stack_exists(input_stack_name):
+                print(f"Stack '{input_stack_name}' deleted successfully.")
+            else:
+                print(f"Stack deletion failed. Stack '{input_stack_name}' still exists.")
 
-def run():
-    """
-    Execute the main functionality of the script.
-    """
-    cluster_id, termination_time = get_user_input()
+        except ClientError as e:
+            print(f"Error: {str(e)}")
 
-    if cluster_id:
-        if termination_time:
-            wait_and_terminate(cluster_id, termination_time)
-        else:
-            terminate_emr_cluster(cluster_id)
+    def run(self):
+        """
+        Run the stack deletion process.
+        """
+        if len(sys.argv) != 2:
+            print("Usage: python delete_stack.py <stack_name>")
+            sys.exit(1)
+        stack_name = sys.argv[1]
+
+        if self.stack_exists(stack_name):
+            self.delete_stack(stack_name)
 
 if __name__ == "__main__":
-    run()
+
+    stack_manager = StackManager()
+    stack_manager.run()
