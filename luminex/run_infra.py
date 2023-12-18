@@ -133,18 +133,15 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
     }
 
     response = requests.post(url, headers=headers, data=json.dumps(payload), verify=False)
-    print(f'Response status code: {response.status_code}')
-    print(f'Response content: {response.text}')
 
     if response.status_code == 204:
-        print('Workflow triggered successfully.')
+        print(f'Response status code: {response.status_code}, Workflow triggered successfully.')
     else:
         print(f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, Content: {response.text}')
         return None
 
     if fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token):
         outputs = get_stack_outputs(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token)
-        print("Stack Outputs:")
         for key, value in outputs.items():
             print(f"Infra has been set.{key}: {value} ")
     else:
