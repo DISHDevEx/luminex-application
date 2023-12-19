@@ -4,7 +4,8 @@
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
     "file_path" : "xxx",
-    "access_token": "xxx",
+    "files_to_validate" : ["xxx"],
+    "access_token" : "xxx",
     "permissions": {
         "StackSet-EMR-Role": [
             "CloudWatchFullAccess",
