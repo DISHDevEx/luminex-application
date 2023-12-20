@@ -2,7 +2,7 @@ import boto3
 import json
 
 class InputValidator:
-    def __init__(self, config_file, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN):
+    def __init__(self, config_file, aws_access_key_id, aws_secret_access_key, aws_session_token):
         # Read configuration from the provided config file
         self.config = self.read_config(config_file)
         # Extract source and destination bucket names from the configuration file
@@ -10,9 +10,9 @@ class InputValidator:
         self.destination_bucket = self.config.get('destination_bucket', '')
 
         # AWS credentials
-        self.AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
-        self.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
-        self.AWS_SESSION_TOKEN = AWS_SESSION_TOKEN
+        self.AWS_ACCESS_KEY_ID = aws_access_key_id
+        self.AWS_SECRET_ACCESS_KEY = aws_secret_access_key
+        self.AWS_SESSION_TOKEN = aws_session_token
 
     def read_config(self, file_path):
         # Read JSON configuration file
@@ -56,11 +56,3 @@ class InputValidator:
             print("Source and Destination Validation passed.")
         else:
             print("Source and Destination Validation failed. Check the error messages for details.")
-
-if __name__ == "__main__":
-    # Create an instance of the InputValidator class
-    input_validator = InputValidator('config.json')
-    
-    # Run the input validation
-    input_validator.run_validation()
-

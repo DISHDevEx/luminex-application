@@ -76,10 +76,3 @@ class ETLFileValidator:
 
         return responses
 
-
-if __name__ == "__main__":
-    # Create an instance of the ETLFileValidator class
-    etl_validator = ETLFileValidator('config.json')
-
-    # Run the ETL logic file validation for multiple files
-    etl_validator.validate_files()
