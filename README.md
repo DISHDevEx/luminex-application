@@ -27,7 +27,7 @@ luminex_application-repo/
 |   |   |-- input_validator.py
 |   |   |-- stack_name_validator.py
 |   |   |-- rolename_permissions_validator.py
-|   |   |-- transformation_file_validation.py
+|   |   |-- validate_multiple_files.py
 |   |   |-- run_all_validations.py
 |   |-- __init__.py
 |   |-- run_infra.py

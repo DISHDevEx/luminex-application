@@ -3,8 +3,7 @@
     "destination_bucket": "xxx",
     "organization" : "DISHDevEx",
     "repo_name" : "luminex-transformation",
-    "file_path" : "xxx",
-    "files_to_validate" : ["xxx"],
+    "files_to_validate" : ["transformations1.py"],
     "access_token" : "xxx",
     "permissions": {
         "StackSet-EMR-Role": [
