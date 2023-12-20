@@ -41,12 +41,14 @@ class IAMRoleValidator:
                 role_policies = self.iam_client.list_attached_role_policies(RoleName=role_name)
                 role_permissions = [item.get('PolicyName', '') for item in role_policies.get('AttachedPolicies', [])]
 
-                # Compare required permissions with actual permissions of the IAM role
-                for required_permission in required_permissions:
-                    if required_permission not in role_permissions:
-                        print(f"Role '{role_name}' is missing required permission: {required_permission}")
-                    else:
-                        print(f"Role '{role_name}' has required permission: {required_permission}")
+                # Track missing permissions
+                missing_permissions = [p for p in required_permissions if p not in role_permissions]
+
+                # Print the final message
+                if not missing_permissions:
+                    print(f"Role '{role_name}' has all required permissions.")
+                else:
+                    print(f"Role '{role_name}' is missing the following permissions: {', '.join(missing_permissions)}")
             else:
                 print(f"Role '{role_name}' does not exist. Skipping validation.")
 
@@ -60,8 +62,3 @@ class IAMRoleValidator:
                 return False
             else:
                 raise
-
-if __name__ == "__main__":
-    # Create an instance of IAMRoleValidator and run the permissions validator
-    permissions_validator = IAMRoleValidator('config.json')
-    permissions_validator.validate_roles()

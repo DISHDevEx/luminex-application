@@ -53,7 +53,7 @@ class InputValidator:
     def run_validation(self):
         # Run the input validation
         if self.validate_input():
-            print("Source and Destination Validation passed. Start your infra logic.")
+            print("Source and Destination Validation passed.")
         else:
             print("Source and Destination Validation failed. Check the error messages for details.")
 
