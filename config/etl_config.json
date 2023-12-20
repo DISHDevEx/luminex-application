@@ -1,0 +1,10 @@
+{
+  "s3_input_bucket_name": "xxx",
+  "aws_region": "us-east-1",
+  "transformation_folder_path": "xxx",
+  "s3_bucket_input_path": "s3://xxx/",
+  "s3_bucket_output_path": "s3://xxx/",
+  "transformation_folder": "xxx",
+  "input_folder": "s3://xxx"
+}
+
