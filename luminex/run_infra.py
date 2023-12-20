@@ -57,6 +57,12 @@ def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws
     # Retry fetching the EMR Cluster ID with a delay in case of 404 errors
     for retry_count in range(max_retries):
         try:
+            stack_resources = client.list_stack_resources(StackName=stack_name)
+            stack_resources = stack_resources['StackResourceSummaries']
+            print("Resources:")
+            for resource in stack_resources:
+                print("| {} | {} | {} | {} |".format(resource['LogicalResourceId'], resource['PhysicalResourceId'], resource['ResourceType'], resource['ResourceStatus']))
+
             stack = client.describe_stacks(StackName=stack_name)
             status = stack['Stacks'][0]['StackStatus']
 
@@ -67,7 +73,7 @@ def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws
             elif status.endswith('ROLLBACK'):
                 print(f"Stack {stack_name} creation failed.")
                 return False
-
+        
         except client.exceptions.ClientError as e:
             if 'does not exist' in str(e):
                 pass  # Stack doesn't exist yet, continue waiting
