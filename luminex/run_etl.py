@@ -31,7 +31,7 @@ def clone_private_repo(repo_url, local_repo_path, token):
 
             Parameters:
                     repo_url (str): The path of the config file
-                    local_repo_path ( str): The local path where the repo can be cloned to
+                    local_repo_path (str): The local path where the repo can be cloned to
                     token (str): GitHub token to get access to the Repo
 
             Returns:
@@ -41,9 +41,9 @@ def clone_private_repo(repo_url, local_repo_path, token):
         g = Github(token, verify=False)
         repo = g.get_repo(repo_url)
 
-        # Clone the private repository to a local directory
-        local_repo_path = local_repo_path
-        os.system(f"git clone {repo.clone_url} {local_repo_path}")
+        # Clone the private repository using SSH
+        ssh_url = repo.ssh_url
+        os.system(f"git clone {ssh_url} {local_repo_path}")
 
         return local_repo_path
     except UnknownObjectException as e:
@@ -69,9 +69,6 @@ def submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token
     """
     emr_client = boto3.client('emr', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
                               aws_session_token=aws_session_token, region_name=region_name)
-    print(script_s3_path)
-    print(s3_input_path)
-    print(s3_output_path)
     response = emr_client.add_job_flow_steps(
         JobFlowId=emr_cluster_id,
         Steps=[
@@ -91,10 +88,20 @@ def submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token
         ]
     )
 
-    time.sleep(20)
+    step_id = response['StepIds'][0]
+
+    while True:
+        step_status = emr_client.describe_step(ClusterId=emr_cluster_id, StepId=step_id)['Step']['Status']['State']
+        print(f'Step {step_id} status: {step_status}')
+
+        if step_status in ['COMPLETED', 'FAILED', 'CANCELLED']:
+            break
+
+        time.sleep(20)
+
     print(f'Transformation executed, refer to {s3_output_path} for the transformed output.')
 
-    return response
+    return {'StepId': step_id, 'Status': step_status}
 
 
 def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
@@ -136,7 +143,6 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
     config = read_config('../config/etl_config.json')
     github_token = pat
     region_name = config.get('aws_region', 'aws-region')
-    print(len(transformation_names))
     if num_transformations == len(transformation_names):
         try:
             github_repo_url = config.get('transformation_folder_path')
@@ -162,14 +168,19 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
                             print(f"Uploaded {file_path} to S3: s3://{s3_input_bucket_name}/{s3_object_key}")
 
             s3_bucket_input_path = config.get('s3_bucket_input_path', 'path-to-s3-bucket')
-            s3_bucket_output_path = config.get('s3_bucket_output_path', 'path-to-s3-bucket')
+            s3_bucket_temp_output_path = config.get('s3_bucket_temp_output_path', 'path-to-temporary-s3-bucket')
             transformation_folder = config.get('transformation_folder', 'path-to-s3-transformation_folder')
+            s3_bucket_final_output_path = config.get('s3_bucket_final_output_path', 'path-to-temporary-s3-bucket')
             input_folder = config.get('input_folder')
+            boat = config.get('boat', 'name-for-temp-files-to-be-stored')
 
             # Step 1: Run transformations
             for i, transformation_script_name in enumerate(transformation_names, start=1):
                 print(f'Executing {i}/{num_transformations} Transformations...')
-                transformation_output_path = s3_bucket_output_path + transformation_script_name + '_output/'
+                transformation_output_path = s3_bucket_temp_output_path + boat + \
+                                             transformation_script_name + '_output/' \
+                    if i != num_transformations else s3_bucket_final_output_path + \
+                                                     transformation_script_name + '_output/'
                 transformation_script = transformation_script_name + '.py'
                 transformation_step_name = f'Luminex_' + transformation_script_name
                 submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token,
