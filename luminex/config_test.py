@@ -2,11 +2,11 @@
 import subprocess
 import sys
 
-# get git repo root level
+# get repo root level
 root_path = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
 ).stdout.rstrip("\n")
-# add git repo path to use all libraries
+# add repo path to use all libraries
 sys.path.append(root_path)
 
 from configs import Config

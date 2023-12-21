@@ -1,15 +1,16 @@
 AWS:
-  AWS_ACCESS_KEY_ID: ""
-  AWS_SECRET_ACCESS_KEY: ""
-  AWS_SESSION_TOKEN: ""
-  AWS_REGION: ""
+  ACCESS_KEY_ID: ""
+  SECRET_ACCESS_KEY: ""
+  SESSION_TOKEN: ""
+  REGION: ""
 
 VALIDATION:
   SOURCE_BUCKET: ""
   DESTINATION_BUCKET: ""
   ORGANIZATION: ""
   REPO_NAME: ""
-  FILE_PATH: ""
+  FILES_TO_VALIDATE:
+    - "transformations1.py"
   ACCESS_TOKEN: ""
   PERMISSIONS:
 #    StackSet-EMR-Role: ["CloudWatchFullAccess", "AmazonEC2FullAccess", "AmazonS3FullAccess", "AmazonSSMFullAccess", "AmazonSageMakerFullAccess", "AmazonElasticMapReduceRole"]
@@ -27,6 +28,16 @@ INFRA:
   GITHUB_WORKFLOW: ""
   GITHUB_EVENT_TYPE: ""
 
+ETL:
+  S3_INPUT_BUCKET_NAME: ""
+  AWS_REGION: ""
+  TRANSFORMATION_FOLDER_PATH: ""
+  S3_BUCKET_INPUT_PATH: ""
+  S3_BUCKET_TEMP_OUTPUT_PATH: ""
+  S3_BUCKET_FINAL_OUTPUT_PATH: ""
+  TRANSFORMATION_FOLDER: ""
+  BOAT: ""
+  INPUT_FOLDER: ""
 
 experiment:
   meta:
