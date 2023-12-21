@@ -1,11 +1,12 @@
 import os
 import json
-from github import Github
-from github.GithubException import UnknownObjectException
 import boto3
 import time
-# pip install PyGithub
 
+from github import Github
+from github.GithubException import UnknownObjectException
+from validation import InputValidator
+from validation import ETLFileValidator
 
 def read_config(file_path='../config/etl_config.json'):
 
@@ -149,6 +150,18 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
     if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         print("Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables.")
         return
+
+    #ETL Validations
+    # Get the absolute path to the parent directory of the script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Specify the path to the config.json file relative to the script's directory
+    config_path = os.path.join(script_dir, 'validation', 'config.json')
+    # Create an instance of the InputValidator class and Run the Input validation
+    input_validator = InputValidator(config_path,aws_access_key_id, aws_secret_access_key, aws_session_token)
+    input_validator.run_validation()
+    # Create an instance of the ETLFileValidator class and Run the ETL logic validation
+    etl_validator = ETLFileValidator(config_path)
+    etl_validator.validate_files()
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id
