@@ -5,7 +5,8 @@ import json
 import time
 import boto3
 
-def get_stack_outputs(stack_name, region,aws_access_key_id, aws_secret_access_key, aws_session_token):
+
+def get_stack_outputs(stack_name, region, aws_access_key_id, aws_secret_access_key, aws_session_token):
     """
     Returns the EMR cluster ID.
 
@@ -17,7 +18,8 @@ def get_stack_outputs(stack_name, region,aws_access_key_id, aws_secret_access_ke
                     aws_session_token (str): AWS Temp Credentials: Session Token
 
             Returns:
-                    EMR Cluster ID (str): It returns the output of the stack i.e. EMR Cluster ID to the trigger_workflow function
+                    EMR Cluster ID (str): It returns the output of the stack i.e.
+                    EMR Cluster ID to the trigger_workflow function
     """
     client = boto3.client('cloudformation', region_name=region, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, aws_session_token=aws_session_token)
 
@@ -32,7 +34,7 @@ def get_stack_outputs(stack_name, region,aws_access_key_id, aws_secret_access_ke
         return {}
 
 
-def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, max_retries=5, retry_delay=10, initial_delay=900):
+def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token, max_retries=15, retry_delay=60, initial_delay=120):
     """
     Returns the EMR cluster ID.
 
@@ -80,11 +82,12 @@ def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws
             else:
                 raise
 
-        print(f'Retry {retry_count + 1}/{max_retries}. Waiting {retry_delay} seconds before retrying...')
+        print(f'Retry {retry_count + 1}/{max_retries}. EMR Cluster creation in progress, waiting {retry_delay} seconds before fetching more details...')
         time.sleep(retry_delay)
 
     print(f'Exceeded maximum retries. Failed to retrieve EMR Cluster ID. Please check the logs for more information.')
     return None
+
 
 def read_config(file_path='../config/infra_config.json'):
 
@@ -102,18 +105,21 @@ def read_config(file_path='../config/infra_config.json'):
         config_data = json.load(config_file)
     return config_data
 #
+
+
 def trigger_workflow(organization, repository, workflow_name, event_type, aws_region, token, inputs=None):
 
     """
-    Triggers the github actions to create the AWS infrastructure for Luminex.
+    Triggers the GitHub actions to create the AWS infrastructure for Luminex.
 
             Parameters:
                     organization (str): The name of the organization which the Repo belongs to
                     repository (str): The name of the Repo
-                    workflow_name (str): The github action that needs to be triggered to deploy the infra
+                    workflow_name (str): The GitHub action that needs to be triggered to deploy the infra
                     event_type (str): The type of the event to trigger
-                    token (str): The personal access token need to trigger the github action
-                    inputs (dict): The inputs variables that needs to be passed to the github action
+                    aws_region (str): The aws region from where the emr creation status has to be fetched
+                    token (str): The personal access token need to trigger the GitHub action
+                    inputs (dict): The inputs variables that needs to be passed to the GitHub action
 
             Returns:
                     Returns the EMR Cluster ID
@@ -155,7 +161,9 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
 
     return None
 #
-def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN ):
+
+
+def run_infra(pat, stack_name):
 
     """
     Retrieves values from different sources and finally triggers the function to run the github action
@@ -163,19 +171,27 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
             Parameters:
                     pat (str): Personal Access token to trigger github action.
                     stack_name (str): Name of the stack that manages Luminex infra resources.
-                    AWS_ACCESS_KEY_ID (str): AWS Temp Credentials: Access Key ID
-                    AWS_SECRET_ACCESS_KEY (str): AWS Temp Credentials: Secret Access Key
-                    AWS_SESSION_TOKEN (str): AWS Temp Credentials: Session Token
+                    ENV: AWS_ACCESS_KEY_ID (str): AWS Temp Credentials: Access Key ID
+                    ENV: AWS_SECRET_ACCESS_KEY (str): AWS Temp Credentials: Secret Access Key
+                    ENV: AWS_SESSION_TOKEN (str): AWS Temp Credentials: Session Token
 
             Returns:
                     Calls the trigger workflow function with required parameters (From config file: organization_name, repository_name
                     workflow_name, event_type, From user: personal_access_token, workflow_inputs)
     """
+    # Access environment variables
+    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+
+    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
+        print("Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables.")
+        return
 
     # Validation logic
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(script_dir, 'validation', 'config.json')
-    permissions_validator = IAMRoleValidator(config_path, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
+    permissions_validator = IAMRoleValidator(config_path, aws_access_key_id, aws_secret_access_key, aws_session_token)
     permissions_validator.validate_roles()
 
     config = read_config('../config/infra_config.json')
@@ -189,9 +205,9 @@ def run_infra(pat, stack_name, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,AWS_SESS
 
     workflow_inputs = {
         'stack-name': stack_name,
-        'AWS_ACCESS_KEY_ID': AWS_ACCESS_KEY_ID,
-        'AWS_SECRET_ACCESS_KEY': AWS_SECRET_ACCESS_KEY,
-        'AWS_SESSION_TOKEN': AWS_SESSION_TOKEN
+        'AWS_ACCESS_KEY_ID': aws_access_key_id,
+        'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
+        'AWS_SESSION_TOKEN': aws_session_token
     }
 
     trigger_workflow(organization_name, repository_name, workflow_name, event_type, aws_region, personal_access_token, workflow_inputs)
