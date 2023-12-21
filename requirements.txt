@@ -7,3 +7,4 @@ python-dotenv
 requests
 pyyaml>=6.0.1
 pyspark>=3.4.2
+PyGithub

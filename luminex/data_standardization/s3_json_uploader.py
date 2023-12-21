@@ -23,56 +23,35 @@ class S3DataUploader:
         self.bucket_name = bucket_name
         self.client = boto3.client('s3')
         self.resource = boto3.resource('s3')
-    
-    def convert_df_to_json(self, df):
-        """
-        Converts Pandas DataFrame to JSON.
 
-        Parameters:
-        - df: Pandas DataFrame.
-
-        Returns:
-        - json_data: JSON data.
-        """
-        json_data = df.toJSON().collect()
-
-        # Convert the list of strings to a JSON-formatted string
-        json_data = "[" + ",".join(json_data) + "]"
-
-        return json_data
-    
-    def upload_json_data_to_s3(self,json_data,bucket_name,file_name,s3_key):
-        """
-        writes data to S3 bucket.
-
-        Parameters:
-        - json_data: JSON data in string format.
-        - bucket (str): The name of the S3 bucket.
-        - s3_key (str): The object key for the file in the S3 bucket.
-        - file_name (str): Filename of the standardized data (json) writing to the s3.
+    def pyspark_df_json_upload(self,df,output_format,output_path):
 
         """
-        # Encode the string to bytes using UTF-8
-        bytes_data = json_data.encode('utf-8')
-        print("\n****-----Data successfully standardized to json-----****")
-        self.client.put_object(Body=bytes_data, Bucket=bucket_name, Key=f'{s3_key}/{file_name}')
-        print(f'DataFrame has been standardized to json and uploaded to S3://{bucket_name}/{s3_key}/{file_name}')
+        df : pysaprk dataframe
+        output_format : format of the transformed-data
+        output_path : output data stored location in s3
+        """
+        df.repartition.write.format(output_format).mode("overwrite").save(output_path)
 
-    def main(self,df,bucket_name,file_name):
+
+    def main(self,df,output_format,output_path):
         """
         Interacts with the user, reads S3 data, and converts to json and displays json data info.
         """
         # #destination
-        s3_key = input(f"Enter S3 key for the {file_name} file:")
-        json_data = self.convert_df_to_json(df)
-        #upload json data to s3
-        self.upload_json_data_to_s3(json_data,bucket_name,file_name,s3_key)
+        # s3_key = input(f"Enter S3 key for the {file_name} file:")
+        # json_data = self.convert_df_to_json(df)
+        # #upload json data to s3
+        # self.upload_json_data_to_s3(json_data,bucket_name,file_name,s3_key)
+        self.pyspark_df_json_upload(df,output_format,output_path)
        
 
 if __name__ == "__main__":
 
     spark = SparkSession.builder.appName("luminex").getOrCreate()
-    file_path = r'xxx'
-    df = spark.read.csv(file_path,header=True,inferSchema=True)
+    input_data= r'xxx'
+    df = spark.read.csv(input_data,header=True,inferSchema=True)
+    output_format= 'json'
+    output_path = r'xxx'
     data_uploader = S3DataUploader()
     data_uploader.main(df)
