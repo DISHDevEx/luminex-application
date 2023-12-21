@@ -4,14 +4,11 @@ from botocore.exceptions import ClientError
 import re
 
 class IAMRoleValidator:
-    def __init__(self, config_path, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN):
+    def __init__(self, config_path):
         # Initialize IAMRoleValidator class with the path to the configuration file
         self.config = self.load_config(config_path)  # Load configuration from the specified file
-        self.iam_client = boto3.client('iam', 
-                                       aws_access_key_id=AWS_ACCESS_KEY_ID, 
-                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                                       aws_session_token=AWS_SESSION_TOKEN)  # Initialize IAM client using boto3
-
+        self.iam_client = boto3.client('iam')
+                                
     def load_config(self, config_path):
         # Load configuration from the specified JSON file
         with open(config_path, 'r') as config_file:
