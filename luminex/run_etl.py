@@ -25,31 +25,6 @@ def read_config(file_path='../config/etl_config.json'):
     return config_data
 
 
-# def clone_private_repo(repo_url, local_repo_path, token):
-#     """
-#     Clones the files needed to run the transformation, to local.
-#
-#             Parameters:
-#                     repo_url (str): The path of the config file
-#                     local_repo_path ( str): The local path where the repo can be cloned to
-#                     token (str): GitHub token to get access to the Repo
-#
-#             Returns:
-#                     local_repo_path (str): The local path where the repo has been cloned to
-#     """
-#     try:
-#         g = Github(token, verify=False)
-#         repo = g.get_repo(repo_url)
-#
-#         # Clone the private repository to a local directory
-#         local_repo_path = local_repo_path
-#         os.system(f"git clone {repo.clone_url} {local_repo_path}")
-#
-#         return local_repo_path
-#     except UnknownObjectException as e:
-#         print(f"Error: {e}")
-#         raise
-
 def clone_private_repo(repo_url, local_repo_path, token):
     """
     Clones the files needed to run the transformation, to local.
