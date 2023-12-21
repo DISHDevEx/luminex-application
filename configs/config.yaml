@@ -1,0 +1,39 @@
+AWS:
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AWS_SESSION_TOKEN: ""
+  AWS_REGION: ""
+
+VALIDATION:
+  SOURCE_BUCKET: ""
+  DESTINATION_BUCKET: ""
+  ORGANIZATION: ""
+  REPO_NAME: ""
+  FILE_PATH: ""
+  ACCESS_TOKEN: ""
+  PERMISSIONS:
+#    StackSet-EMR-Role: ["CloudWatchFullAccess", "AmazonEC2FullAccess", "AmazonS3FullAccess", "AmazonSSMFullAccess", "AmazonSageMakerFullAccess", "AmazonElasticMapReduceRole"]
+    StackSet-EMR-Role:
+      - "CloudWatchFullAccess"
+      - "AmazonEC2FullAccess"
+      - "AmazonS3FullAccess"
+      - "AmazonSSMFullAccess"
+      - "AmazonSageMakerFullAccess"
+      - "AmazonElasticMapReduceRole"
+
+INFRA:
+  GITHUB_ORGANIZATION: ""
+  GITHUB_REPOSITORY: ""
+  GITHUB_WORKFLOW: ""
+  GITHUB_EVENT_TYPE: ""
+
+
+experiment:
+  meta:
+    name: MyFirstExperiment
+  model:
+    family: resnet
+    n_layers: 151
+  training:
+    batch_size: 256
+    epochs: 10000
