@@ -191,7 +191,7 @@ def run_infra(pat, stack_name):
     # Validation logic
     script_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(script_dir, 'validation', 'config.json')
-    permissions_validator = IAMRoleValidator(config_path, aws_access_key_id, aws_secret_access_key, aws_session_token)
+    permissions_validator = IAMRoleValidator(config_path)
     permissions_validator.validate_roles()
 
     config = read_config('../config/infra_config.json')
