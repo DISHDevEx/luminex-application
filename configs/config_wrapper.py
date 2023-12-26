@@ -20,9 +20,9 @@ class Config(object):
 
         try:
             for path_item in path_items:
-                sub_dict = sub_dict.get(path_item)
+                sub_dict = sub_dict.get(path_item.upper())
 
-            value = sub_dict.get(data_item, default)
+            value = sub_dict.get(data_item.upper(), default)
 
             return value
         except (TypeError, AttributeError):

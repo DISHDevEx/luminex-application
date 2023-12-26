@@ -1,10 +1,24 @@
-from validation import IAMRoleValidator
 import os
+import sys
+import subprocess
 import requests
 import json
 import time
 import boto3
 
+from validation import IAMRoleValidator
+
+# get repo root level
+root_path = subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
+).stdout.rstrip("\n")
+# add repo path to use all libraries
+sys.path.append(root_path)
+
+from configs import Config
+
+# Declare Global Variable
+cfg = Config('configs/config.yaml')
 
 def get_stack_outputs(stack_name, region, aws_access_key_id, aws_secret_access_key, aws_session_token):
     """
@@ -179,27 +193,26 @@ def run_infra(pat, stack_name):
                     Calls the trigger workflow function with required parameters (From config file: organization_name, repository_name
                     workflow_name, event_type, From user: personal_access_token, workflow_inputs)
     """
-    # Access environment variables
-    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+    # Access AWS config
+    aws_access_key_id = cfg.get('aws/access_key_id')
+    aws_secret_access_key = cfg.get('aws/secret_access_key')
+    aws_session_token = cfg.get('aws/session_token')
 
     if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         print("Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables.")
         return
 
     # Validation logic
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(script_dir, 'validation', 'config.json')
-    permissions_validator = IAMRoleValidator(config_path)
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # config_path = os.path.join(script_dir, 'validation', 'config.json')
+    permissions_validator = IAMRoleValidator(cfg)
     permissions_validator.validate_roles()
 
-    config = read_config('../config/infra_config.json')
-    organization_name = config.get('GITHUB_ORGANIZATION', 'your-organization')
-    repository_name = config.get('GITHUB_REPOSITORY', 'your-username/your-repo')
-    workflow_name = config.get('GITHUB_WORKFLOW', 'name-of-your-workflow')
-    event_type = config.get('GITHUB_EVENT_TYPE', 'type-of-the-github-workflow-event')
-    aws_region = config.get('aws_region', 'aws-region')
+    organization_name = cfg.get('infra/github_organization')
+    repository_name = cfg.get('infra/github_repository')
+    workflow_name = cfg.get('infra/github_workflow')
+    event_type = cfg.get('infra/github_event_type')
+    aws_region = cfg.get('aws/region')
     personal_access_token = pat
 
 

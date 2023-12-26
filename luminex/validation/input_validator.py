@@ -2,18 +2,12 @@ import boto3
 import json
 
 class InputValidator:
-    def __init__(self, config_file):
+    def __init__(self, cfg):
         # Read configuration from the provided config file
-        self.config = self.read_config(config_file)
+        self.config = cfg
         # Extract source and destination bucket names from the configuration file
-        self.source_bucket = self.config.get('source_bucket', '')
-        self.destination_bucket = self.config.get('destination_bucket', '')
-
-    def read_config(self, file_path):
-        # Read JSON configuration file
-        with open(file_path, 'r') as file:
-            config = json.load(file)
-        return config
+        self.source_bucket = self.config.get('validation/source_bucket')
+        self.destination_bucket = self.config.get('validation/destination_bucket')
 
     def validate_input(self):
         # Validate source and destination buckets
