@@ -8,7 +8,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ETLFileValidator:
-    def __init__(self, config_file):
+    def __init__(self, cfg):
         """
         Initialize the ETLFileValidator.
 
@@ -19,12 +19,10 @@ class ETLFileValidator:
               - access_token (str): GitHub access token for authentication.
               - files_to_validate (list): List of file names within the GitHub repository.
         """
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-            self.organization = config.get('organization')
-            self.repo_name = config.get('repo_name')
-            self.access_token = config.get('access_token')
-            self.files_to_validate = config.get('files_to_validate', [])
+        self.organization = cfg.get('validation/organization')
+        self.repo_name = cfg.get('validation/repo_name')
+        self.access_token = cfg.get('validation/access_token')
+        self.files_to_validate = cfg.get('validation/files_to_validate', [])
 
     def validate_file(self, file_name):
         """

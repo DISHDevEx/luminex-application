@@ -4,11 +4,23 @@ reads various file types (CSV, JSON, Parquet) resulting PySpark DataFrame.
 """
 import os
 import sys
+import subprocess
 from pyspark.sql import SparkSession
 
-# Add the parent directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from config import aws_config
+# # Add the parent directory to the Python path
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# from config import aws_config
+
+# get repo root level
+root_path = subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
+).stdout.rstrip("\n")
+# add repo path to use all libraries
+sys.path.append(root_path)
+
+from configs import Config
+
+cfg = Config('../configs/config.yaml')
 
 class S3DataLoader:
     """
@@ -27,9 +39,9 @@ class S3DataLoader:
                 .appName("S3ReadExample")\
                 .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.2")\
                 .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")\
-                .config("spark.hadoop.fs.s3a.access.key", aws_config.aws_access_key_id) \
-                .config("spark.hadoop.fs.s3a.secret.key", aws_config.aws_secret_access_key) \
-                .config("spark.hadoop.fs.s3a.session.token", aws_config.aws_session_token)\
+                .config("spark.hadoop.fs.s3a.access.key", cfg.get('aws/access_key_id')) \
+                .config("spark.hadoop.fs.s3a.secret.key", cfg.get('aws/secret_access_key')) \
+                .config("spark.hadoop.fs.s3a.session.token", cfg.get('aws/session_token'))\
                 .getOrCreate()
 
     def read_csv_to_df(self, bucket_folder_path):

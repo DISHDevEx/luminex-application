@@ -1,0 +1,52 @@
+AWS:
+  ACCESS_KEY_ID:
+  SECRET_ACCESS_KEY:
+  SESSION_TOKEN:
+
+VALIDATION:
+  SOURCE_BUCKET:
+  DESTINATION_BUCKET:
+  ORGANIZATION: DISHDevEx
+  REPO_NAME: luminex-transformation
+  FILES_TO_VALIDATE:
+    - transformations1.py
+  ACCESS_TOKEN:
+  PERMISSIONS:
+    STACKSETEMRROLE:
+      - CloudWatchFullAccess
+      - AmazonEC2FullAccess
+      - AmazonS3FullAccess
+      - AmazonSSMFullAccess
+      - AmazonSageMakerFullAccess
+      - AmazonElasticMapReduceRole
+
+INFRA:
+  GITHUB_ORGANIZATION: DISHDevEx
+  GITHUB_REPOSITORY: luminex-application
+  GITHUB_WORKFLOW: create-emr-cft.yml
+  GITHUB_EVENT_TYPE: create-emr-cft
+
+ETL:
+  S3_INPUT_BUCKET_NAME:
+  AWS_REGION:
+  TRANSFORMATION_FOLDER_PATH: DISHDevEx/luminex-transformation
+  S3_BUCKET_INPUT_PATH:
+  S3_BUCKET_TEMP_OUTPUT_PATH:
+  S3_BUCKET_FINAL_OUTPUT_PATH:
+  TRANSFORMATION_FOLDER: scripts/transformation/
+  BOAT: luminex
+  INPUT_FOLDER:
+
+EXPERIMENT:
+  META:
+    NAME: MyFirstExperiment
+  MODEL:
+    FAMILY: resnet
+    N_LAYERS: 151
+    NESTED_FAMILY:
+      ITEMS:
+        - CloudWatchFullAccess
+        - AmazonEC2FullAccess
+  TRAINING:
+    BATCH_SIZE: 256
+    EPOCHS: 10000

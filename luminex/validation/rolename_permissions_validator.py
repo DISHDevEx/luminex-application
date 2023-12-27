@@ -4,15 +4,11 @@ from botocore.exceptions import ClientError
 import re
 
 class IAMRoleValidator:
-    def __init__(self, config_path):
+    def __init__(self, cfg):
         # Initialize IAMRoleValidator class with the path to the configuration file
-        self.config = self.load_config(config_path)  # Load configuration from the specified file
+        self.config = cfg  # Load configuration from the specified file
         self.iam_client = boto3.client('iam')
-                                
-    def load_config(self, config_path):
-        # Load configuration from the specified JSON file
-        with open(config_path, 'r') as config_file:
-            return json.load(config_file)
+
 
     def is_valid_role_name_format(self, role_name):
         # Check if the role name adheres to the specified format
@@ -22,7 +18,7 @@ class IAMRoleValidator:
 
     def validate_roles(self):
         # Validate IAM roles based on the specified permissions in the configuration
-        permissions_config = self.config.get('permissions', {})
+        permissions_config = self.config.get('validation/permissions', {})
 
         for role_name, required_permissions in permissions_config.items():
             if self.iam_role_exists(role_name):

@@ -1,5 +1,6 @@
 import os
-import json
+import subprocess
+import sys
 import boto3
 import time
 
@@ -8,21 +9,17 @@ from github.GithubException import UnknownObjectException
 from validation import InputValidator
 from validation import ETLFileValidator
 
-def read_config(file_path='../config/etl_config.json'):
+# get repo root level
+root_path = subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
+).stdout.rstrip("\n")
+# add repo path to use all libraries
+sys.path.append(root_path)
 
-    """
-    Returns the static parameters to run_infra from the config file.
+from configs import Config
 
-            Parameters:
-                    file_path (str): The path of the config file
-
-            Returns:
-                    config_data (dict): Represents the data in the config file
-    """
-
-    with open(file_path, 'r') as config_file:
-        config_data = json.load(config_file)
-    return config_data
+# Declare Global Variable
+cfg = Config('../configs/config.yaml')
 
 
 def clone_private_repo(repo_url, local_repo_path, token):
@@ -118,39 +115,39 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
                     ENV: aws_session_token (str): AWS Temp Credentials: Session Token
     """
     # Access environment variables
-    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-    aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+    aws_access_key_id = cfg.get('aws/access_key_id')
+    aws_secret_access_key = cfg.get('aws/secret_access_key')
+    aws_session_token = cfg.get('aws/session_token')
 
     if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         print("Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables.")
         return
 
     #ETL Validations
-    # Get the absolute path to the parent directory of the script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Specify the path to the config.json file relative to the script's directory
-    config_path = os.path.join(script_dir, 'validation', 'config.json')
+    # # Get the absolute path to the parent directory of the script
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # # Specify the path to the config.json file relative to the script's directory
+    # config_path = os.path.join(script_dir, 'validation', 'config.json')
     # Create an instance of the InputValidator class and Run the Input validation
-    input_validator = InputValidator(config_path)
+    input_validator = InputValidator(cfg)
     input_validator.run_validation()
     # Create an instance of the ETLFileValidator class and Run the ETL logic validation
-    etl_validator = ETLFileValidator(config_path)
+    etl_validator = ETLFileValidator(cfg)
     etl_validator.validate_files()
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id
-    config = read_config('../config/etl_config.json')
+    # config = read_config('../config/etl_config.json')
     github_token = pat
-    region_name = config.get('aws_region', 'aws-region')
+    region_name = cfg.get('etl/aws_region', 'aws-region')
     if num_transformations == len(transformation_names):
         try:
-            github_repo_url = config.get('transformation_folder_path')
+            github_repo_url = cfg.get('etl/transformation_folder_path')
 
             # Cloning the GitHub repository
             local_repo_path = clone_private_repo(github_repo_url, "local_transformation_repo", github_token)
 
-            s3_input_bucket_name = config.get('s3_input_bucket_name', 'name-of-s3-bucket')
+            s3_input_bucket_name = cfg.get('wtl/s3_input_bucket_name', 'name-of-s3-bucket')
 
             # Initializing the S3 client
             s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
@@ -167,12 +164,12 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
                             s3.upload_file(file_path, s3_input_bucket_name, s3_object_key)
                             print(f"Uploaded {file_path} to S3: s3://{s3_input_bucket_name}/{s3_object_key}")
 
-            s3_bucket_input_path = config.get('s3_bucket_input_path', 'path-to-s3-bucket')
-            s3_bucket_temp_output_path = config.get('s3_bucket_temp_output_path', 'path-to-temporary-s3-bucket')
-            transformation_folder = config.get('transformation_folder', 'path-to-s3-transformation_folder')
-            s3_bucket_final_output_path = config.get('s3_bucket_final_output_path', 'path-to-temporary-s3-bucket')
-            input_folder = config.get('input_folder')
-            boat = config.get('boat', 'name-for-temp-files-to-be-stored')
+            s3_bucket_input_path = cfg.get('etl/s3_bucket_input_path', 'path-to-s3-bucket')
+            s3_bucket_temp_output_path = cfg.get('etl/s3_bucket_temp_output_path', 'path-to-temporary-s3-bucket')
+            transformation_folder = cfg.get('etl/transformation_folder', 'path-to-s3-transformation_folder')
+            s3_bucket_final_output_path = cfg.get('etl/s3_bucket_final_output_path', 'path-to-temporary-s3-bucket')
+            input_folder = cfg.get('etl/input_folder')
+            boat = cfg.get('etl/boat', 'name-for-temp-files-to-be-stored')
 
             # Step 1: Run transformations
             for i, transformation_script_name in enumerate(transformation_names, start=1):
