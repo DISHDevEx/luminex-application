@@ -1,6 +1,6 @@
 import os
 import subprocess
-import json
+import sys
 import boto3
 import time
 
@@ -19,7 +19,7 @@ sys.path.append(root_path)
 from configs import Config
 
 # Declare Global Variable
-cfg = Config('configs/config.yaml')
+cfg = Config('../configs/config.yaml')
 
 
 def clone_private_repo(repo_url, local_repo_path, token):

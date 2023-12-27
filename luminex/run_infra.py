@@ -1,4 +1,3 @@
-import os
 import sys
 import subprocess
 import requests
@@ -18,7 +17,7 @@ sys.path.append(root_path)
 from configs import Config
 
 # Declare Global Variable
-cfg = Config('configs/config.yaml')
+cfg = Config('../configs/config.yaml')
 
 def get_stack_outputs(stack_name, region, aws_access_key_id, aws_secret_access_key, aws_session_token):
     """

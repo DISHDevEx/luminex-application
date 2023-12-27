@@ -22,5 +22,5 @@ def train(cfg):
 
 
 if __name__ == '__main__':
-    cfg = Config('configs/config.yaml')
+    cfg = Config('../configs/config.yaml')
     train(cfg)
