@@ -20,7 +20,7 @@ sys.path.append(root_path)
 
 from configs import Config
 
-cfg = Config('configs/config.yaml')
+cfg = Config('../configs/config.yaml')
 
 class S3DataLoader:
     """
