@@ -1,4 +1,3 @@
-from .input_validator import InputValidator
 from .validate_multiple_files import ETLFileValidator
-from .rolename_permissions_validator import IAMRoleValidator
-from .etl_validations import ETLValidator
+from .infra_validator import IAMRoleValidator
+from .etl_validator import ETLValidator
