@@ -6,8 +6,8 @@ import time
 
 from github import Github
 from github.GithubException import UnknownObjectException
-from validation import InputValidator
 from validation import ETLFileValidator
+from validation import ETLS3Validator
 
 # get repo root level
 root_path = subprocess.run(
@@ -101,7 +101,7 @@ def submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token
     return {'StepId': step_id, 'Status': step_status}
 
 
-def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
+def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, source_path, destination_bucket):
     """
     Main function that triggers required functions in the required order to run the transformation on the EMR Cluster.
 
@@ -124,16 +124,10 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
         return
 
     #ETL Validations
-    # # Get the absolute path to the parent directory of the script
-    # script_dir = os.path.dirname(os.path.abspath(__file__))
-    # # Specify the path to the config.json file relative to the script's directory
-    # config_path = os.path.join(script_dir, 'validation', 'config.json')
-    # Create an instance of the InputValidator class and Run the Input validation
-    input_validator = InputValidator(cfg)
-    input_validator.run_validation()
-    # Create an instance of the ETLFileValidator class and Run the ETL logic validation
-    etl_validator = ETLFileValidator(cfg)
-    etl_validator.validate_files()
+    s3_validator = ETLS3Validator(source_path, destination_bucket)
+    s3_validator.run_validation()
+    etl_file_validator = ETLFileValidator(cfg, pat, transformation_names)
+    etl_file_validator.validate_files()
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id
@@ -147,7 +141,7 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names):
             # Cloning the GitHub repository
             local_repo_path = clone_private_repo(github_repo_url, "local_transformation_repo", github_token)
 
-            s3_input_bucket_name = cfg.get('wtl/s3_input_bucket_name', 'name-of-s3-bucket')
+            s3_input_bucket_name = cfg.get('etl/s3_input_bucket_name', 'name-of-s3-bucket')
 
             # Initializing the S3 client
             s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,

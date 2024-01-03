@@ -8,21 +8,18 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class ETLFileValidator:
-    def __init__(self, cfg):
+    def __init__(self, cfg, pat, transformation_names):
         """
         Initialize the ETLFileValidator.
 
         Parameters:
-            - config_file (str): Path to the JSON configuration file containing the following keys:
-              - organization (str): GitHub organization or username.
-              - repo_name (str): Name of the GitHub repository.
-              - access_token (str): GitHub access token for authentication.
-              - files_to_validate (list): List of file names within the GitHub repository.
+            - cfg (dict): Configuration dictionary containing necessary information.
+            - pat (str): GitHub personal access token for authentication.
+            - transformation_names (list): List of transformation file names.
         """
-        self.organization = cfg.get('validation/organization')
-        self.repo_name = cfg.get('validation/repo_name')
-        self.access_token = cfg.get('validation/access_token')
-        self.files_to_validate = cfg.get('validation/files_to_validate', [])
+        self.repo_name = cfg.get('etl/transformation_folder_path')
+        self.access_token = pat
+        self.files_to_validate = [string + ".py" for string in transformation_names]
 
     def validate_file(self, file_name):
         """
@@ -34,29 +31,11 @@ class ETLFileValidator:
         Returns:
             - response (Response): The response object from the GitHub API request.
         """
-        # Try with the full path
-        # Add prefix to the file name
         full_file_name = f'data-source/transformations/{file_name}'
-        # Try with the full path
         encoded_file_path = quote(full_file_name)
-        api_url = f'https://api.github.com/repos/{self.organization}/{self.repo_name}/contents/{encoded_file_path}'
+        api_url = f'https://api.github.com/repos/{self.repo_name}/contents/{encoded_file_path}'
         headers = {'Authorization': f'token {self.access_token}'}
         response = requests.get(api_url, headers=headers, verify=False)
-
-        if response.status_code == 200:
-            print(f'The file {file_name} exists in Repo {self.repo_name}.')
-            return response
-
-        # Retry with just the file name in the root directory
-        api_url = f'https://api.github.com/repos/{self.organization}/{self.repo_name}/data-source/transformations/{quote(file_name)}'
-        response = requests.get(api_url, headers=headers, verify=False)
-
-        if response.status_code == 200:
-            print(f'The file {file_name} exists in Repo {self.repo_name}.')
-        elif response.status_code == 404:
-            print(f'The file {file_name} does not exist in Repo {self.repo_name}.')
-        else:
-            print(f'Error checking file existence for {file_name}: {response.status_code} - {response.text}')
 
         return response
 
@@ -65,12 +44,20 @@ class ETLFileValidator:
         Validate the existence of multiple files within a GitHub repository.
 
         Returns:
-            - responses (list): List of response objects from the GitHub API requests.
+            - missing_files (list): List of transformation files that do not exist.
         """
-        responses = []
+        missing_files = []
+
         for file_name in self.files_to_validate:
             response = self.validate_file(file_name)
-            responses.append(response)
 
-        return responses
+            if response.status_code != 200:
+                missing_files.append(file_name)
+
+        if not missing_files:
+            print(f'All given transformation files exist in Repo {self.repo_name}.')
+        else:
+            print(f'The following transformation files do not exist in Repo {self.repo_name}: {", ".join(missing_files)}.')
+
+        return missing_files
 

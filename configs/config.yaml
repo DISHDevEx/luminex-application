@@ -1,19 +1,12 @@
 AWS:
-  ACCESS_KEY_ID:
-  SECRET_ACCESS_KEY:
-  SESSION_TOKEN:
-  REGION: us-east-1
+  ACCESS_KEY_ID: 
+  SECRET_ACCESS_KEY: 
+  SESSION_TOKEN: 
+  REGION:
 
-VALIDATION:
-  SOURCE_BUCKET:
-  DESTINATION_BUCKET:
-  ORGANIZATION: DISHDevEx
-  REPO_NAME: luminex-transformation
-  FILES_TO_VALIDATE:
-    - transformations1.py
-  ACCESS_TOKEN:
+VALIDATION: 
   PERMISSIONS:
-    STACKSETEMRROLE:
+    StackSet-EMR-Role:
       - CloudWatchFullAccess
       - AmazonEC2FullAccess
       - AmazonS3FullAccess
