@@ -69,3 +69,21 @@ jobs:
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             | jq -r '.StackId')
           echo "CloudFormation stack ID: $stack_id"
+      
+      - name: Check if S3 bucket exists
+        id: check_bucket
+        run: |
+          bucket_name=luminex-application-logs
+          if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
+            echo "Bucket $bucket_name already exists."
+            echo "::set-output name=bucket_exists::true"
+          else
+            echo "Bucket $bucket_name does not exist."
+            echo "::set-output name=bucket_exists::false"
+          fi
+
+      - name: Create S3 bucket if it doesn't exist
+        if: steps.check_bucket.outputs.bucket_exists == 'false'
+        run: |
+          bucket_name=<your-bucket-name>
+          aws s3api create-bucket --bucket $bucket_name --region ${{github.event.inputs.AWS_Region || 'us-east-1'}} --create-bucket-configuration LocationConstraint= ${{github.event.inputs.AWS_Region || 'us-east-1'}}
