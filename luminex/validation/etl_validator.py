@@ -29,25 +29,28 @@ class ETLValidator:
 
         s3 = boto3.client('s3')
 
-        if path_type == "Destination":
-            try:
-                # Check if the specified S3 bucket exists
-                s3.head_bucket(Bucket=bucket)
-            except Exception as e:
-                print(f"{path_type} bucket not found: {e}")
-                return False
-        else:
-            # For source path, check if the object exists
-            if not key:
-                print(f"{path_type} path is missing the object key.")
-                return False
+        try:
+            # Check if the specified S3 bucket exists
+            s3.head_bucket(Bucket=bucket)
+        except Exception as e:
+            print(f"{path_type} bucket not found: {e}")
+            return False
 
-            try:
-                # Check if the specified S3 object exists
-                s3.head_object(Bucket=bucket, Key=key)
-            except Exception as e:
-                print(f"{path_type} path not found: {e}")
-                return False
+        if path_type == "Source":
+            # For source path, key is not mandatory
+            return True
+
+            # Uncomment the following block if you want to check for the existence of the object key
+            # if not key:
+            #     print(f"{path_type} path is missing the object key.")
+            #     return False
+            #
+            # try:
+            #     # Check if the specified S3 object exists
+            #     s3.head_object(Bucket=bucket, Key=key)
+            # except Exception as e:
+            #     print(f"{path_type} path not found: {e}")
+            #     return False
 
         return True
 
