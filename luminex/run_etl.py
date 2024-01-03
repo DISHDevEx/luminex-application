@@ -126,7 +126,7 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
     #ETL Validations
     s3_validator = ETLS3Validator(source_path, destination_bucket)
     s3_validator.run_validation()
-    etl_file_validator = ETLFileValidator(cfg,pat,transformation_names)
+    etl_file_validator = ETLFileValidator(cfg, pat, transformation_names)
     etl_file_validator.validate_files()
 
     local_repo_path = None
@@ -141,7 +141,7 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
             # Cloning the GitHub repository
             local_repo_path = clone_private_repo(github_repo_url, "local_transformation_repo", github_token)
 
-            s3_input_bucket_name = cfg.get('wtl/s3_input_bucket_name', 'name-of-s3-bucket')
+            s3_input_bucket_name = cfg.get('etl/s3_input_bucket_name', 'name-of-s3-bucket')
 
             # Initializing the S3 client
             s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,

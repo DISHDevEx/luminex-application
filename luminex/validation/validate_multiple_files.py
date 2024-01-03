@@ -6,6 +6,7 @@ from urllib.parse import quote
 # Suppress only the InsecureRequestWarning from urllib3 needed in this case
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 class ETLFileValidator:
     def __init__(self, cfg, pat, transformation_names):
         """
