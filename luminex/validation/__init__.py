@@ -1,3 +1,3 @@
 from .validate_multiple_files import ETLFileValidator
 from .infra_validator import IAMRoleValidator
-from .etl_validator import ETLValidator
+from .s3_validator import ETLS3Validator

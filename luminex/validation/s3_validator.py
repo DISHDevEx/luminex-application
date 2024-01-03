@@ -1,7 +1,7 @@
 import sys
 import boto3
 
-class ETLValidator:
+class ETLS3Validator:
     def __init__(self, source_path, destination_bucket):
         # Extract source and destination bucket names from the provided paths
         self.source_path = source_path

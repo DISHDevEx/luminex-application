@@ -6,8 +6,8 @@ import time
 
 from github import Github
 from github.GithubException import UnknownObjectException
-#from validation import ETLFileValidator
-from validation import ETLValidator
+from validation import ETLFileValidator
+from validation import ETLS3Validator
 
 # get repo root level
 root_path = subprocess.run(
@@ -124,11 +124,10 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
         return
 
     #ETL Validations
-    validator = ETLValidator(source_path, destination_bucket)
-    validator.run_validation()
-    # # Create an instance of the ETLFileValidator class and Run the ETL logic validation
-    # etl_validator = ETLFileValidator(cfg)
-    # etl_validator.validate_files()
+    s3_validator = ETLS3Validator(source_path, destination_bucket)
+    s3_validator.run_validation()
+    etl_file_validator = ETLFileValidator(cfg,pat,transformation_names)
+    etl_file_validator.validate_files()
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id

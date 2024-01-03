@@ -4,7 +4,7 @@ AWS:
   SESSION_TOKEN: 
   REGION:
 
-VALIDATION:
+VALIDATION: 
   PERMISSIONS:
     StackSet-EMR-Role:
       - CloudWatchFullAccess
