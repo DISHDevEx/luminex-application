@@ -85,12 +85,12 @@ jobs:
       - name: Create S3 bucket if it doesn't exist
         if: steps.check_bucket.outputs.bucket_exists == 'false'
         run: |
-          bucket_name=luminex-application-logs
-          aws s3api create-bucket --bucket luminex-application-logs --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          bucket_name=luminex-application-files
+          aws s3api create-bucket --bucket luminex-application-files --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
 
       - name: Check and Create 'scripts' folder
         run: |
-          bucket_name=luminex-application-logs
+          bucket_name=luminex-application-files
           folder_key=scripts/
           if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
             echo "Folder $folder_key already exists."
@@ -101,7 +101,7 @@ jobs:
 
       - name: Check and Create 'temp-etl-data' folder
         run: |
-          bucket_name=luminex-application-logs
+          bucket_name=luminex-application-files
           folder_key=temp-etl-data/
           if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
             echo "Folder $folder_key already exists."
