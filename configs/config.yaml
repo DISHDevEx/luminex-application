@@ -2,7 +2,7 @@ AWS:
   ACCESS_KEY_ID: 
   SECRET_ACCESS_KEY: 
   SESSION_TOKEN: 
-  REGION:
+  REGION : 
 
 VALIDATION: 
   PERMISSIONS:
@@ -22,7 +22,7 @@ INFRA:
 
 ETL:
   S3_BUCKET_TEMP: luminex-application-files
-  AWS_REGION:
+  AWS_REGION: us-east-1
   TRANSFORMATION_FOLDER_PATH: DISHDevEx/luminex-transformation
   BOAT: luminex
 
