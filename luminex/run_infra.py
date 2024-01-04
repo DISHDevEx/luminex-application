@@ -118,8 +118,27 @@ def read_config(file_path='../config/infra_config.json'):
     with open(file_path, 'r') as config_file:
         config_data = json.load(config_file)
     return config_data
-#
+
 def get_latest_workflow_run_id(organization, repository, workflow_name, token):
+    """
+    Retrieve the ID of the latest run for a specified GitHub Actions workflow.
+
+    Parameters:
+    - organization (str): The GitHub organization or username.
+    - repository (str): The name of the GitHub repository.
+    - workflow_name (str): The name of the GitHub Actions workflow.
+    - token (str): Personal access token for authentication.
+
+    Returns:
+    - int or None: The ID of the latest workflow run if available, or None if no runs exist or an error occurs.
+
+    This function sends a GET request to the GitHub API to fetch information about the workflow runs
+    for the specified repository and workflow. It extracts the ID of the latest run and returns it.
+    If there are no runs or if an error occurs during the API request, the function returns None.
+
+    Note: Make sure the provided token has the necessary permissions to access workflow run information.
+    """
+
     url = f'https://api.github.com/repos/{organization}/{repository}/actions/workflows/{workflow_name}/runs'
     headers = {
         'Authorization': f'Bearer {token}',
@@ -141,6 +160,27 @@ def get_latest_workflow_run_id(organization, repository, workflow_name, token):
         return None
 
 def get_workflow_run_details(owner, repo, run_id, github_token):
+    """
+    Retrieve detailed information about a specific GitHub Actions workflow run.
+
+    Parameters:
+    - owner (str): The owner of the GitHub repository (organization or username).
+    - repo (str): The name of the GitHub repository.
+    - run_id (int): The ID of the GitHub Actions workflow run to retrieve details for.
+    - github_token (str): Personal access token for authentication.
+
+    Returns:
+    - dict or str: A dictionary containing detailed information about the workflow run if successful,
+      or an error message string if the API request fails.
+
+    This function sends a GET request to the GitHub API to fetch detailed information about the specified
+    workflow run in the given repository. The information includes metadata, status, conclusion, and other details.
+    If the request is successful (status code 200), the function returns the data as a dictionary.
+    If an error occurs during the API request, the function returns an error message string.
+
+    Note: Ensure that the provided token has the necessary permissions to access workflow run details.
+    """
+
     url = f'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}'
     headers = {
         'Authorization': f'Bearer {github_token}',
@@ -155,7 +195,30 @@ def get_workflow_run_details(owner, repo, run_id, github_token):
     else:
         return f'Error: {response.status_code}, {response.text}'
 
+
 def print_step_logs(organization, repository, workflow_run_id, token):
+    """
+    Print and analyze the details of each step in a GitHub Actions workflow run.
+
+    Parameters:
+    - organization (str): The GitHub organization or username.
+    - repository (str): The name of the GitHub repository.
+    - workflow_run_id (int): The ID of the GitHub Actions workflow run to analyze.
+    - token (str): Personal access token for authentication.
+
+    Returns:
+    - str: A message indicating the status of the workflow run. If the workflow is successful,
+      the message is "workflow successfully ran". If there are failed steps, it provides details
+      about the failure and advises checking downloaded logs for more information.
+
+    This function retrieves information about the jobs and steps in a GitHub Actions workflow run.
+    It prints the status of each step and, if any step fails, provides details about the failure
+    along with a message suggesting checking the downloaded logs for more information.
+
+    Note: Ensure that the provided token has the necessary permissions to access workflow run details
+    and annotations.
+    """
+
     jobs_url = f'https://api.github.com/repos/{organization}/{repository}/actions/runs/{workflow_run_id}/jobs'
     print(jobs_url)
     headers = {
@@ -201,8 +264,27 @@ def print_step_logs(organization, repository, workflow_run_id, token):
         print(f'Failed to fetch jobs. Status code: {response.status_code}')
 
 
-
 def get_workflow_run_logs(owner, repo, run_id, token):
+    """
+    Download and extract the logs of a specific GitHub Actions workflow run.
+
+    Parameters:
+    - owner (str): The owner of the GitHub repository (organization or username).
+    - repo (str): The name of the GitHub repository.
+    - run_id (int): The ID of the GitHub Actions workflow run to retrieve logs for.
+    - token (str): Personal access token for authentication.
+
+    Returns:
+    - int or None: The HTTP status code indicating the success of the operation (200 for success),
+      or None if an error occurs during the API request.
+
+    This function sends a GET request to the GitHub API to fetch the logs of the specified
+    GitHub Actions workflow run in the given repository. If the request is successful (status code 200),
+    the function downloads the logs as a zip file, extracts the contents, and returns the HTTP status code.
+    If an error occurs during the API request, the function prints an error message and returns None.
+
+    Note: Ensure that the provided token has the necessary permissions to access workflow run logs.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/logs"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -262,10 +344,12 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
     response = requests.post(url, headers=headers, data=json.dumps(payload), verify=False)
 
     if response.status_code == 204:
-        print(f'Response status code: {response.status_code}, Workflow triggered successfully.')
+        print(f'Response status code: {response.status_code}, Workflow triggered successfully.Fetching workflow run id')
+        time.sleep(15)
         latest_run_id = get_latest_workflow_run_id(organization, repository, workflow_name, token)
         if latest_run_id is not None:
-            print(f'Latest Workflow Run ID: {latest_run_id}')
+            print(f'Latest Workflow Run ID: {latest_run_id}. Getting Workflow status step by step')
+            time.sleep(20)
             workflow_run_details = get_workflow_run_details(organization, repository, latest_run_id, token)
             if workflow_run_details is not None:
                 conclusion = workflow_run_details['conclusion']
@@ -278,8 +362,6 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
                         failure_reason = print_step_logs(organization, repository, latest_run_id, token)
                         return failure_reason
                         
-
-        
         else:
             print('Failed to retrieve the latest Workflow Run ID.')
             return None
@@ -295,9 +377,6 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
         print("Failed to create the stack.")
 
     return None
-#
-
-
 
 
 def run_infra(pat, stack_name):
