@@ -96,7 +96,11 @@ def submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token
 
         time.sleep(20)
 
-    print(f'Transformation executed, refer to {s3_output_path} for the transformed output.')
+    if step_status == 'COMPLETED':
+        print(f'Transformation executed, refer to {s3_output_path} for the transformed output.')
+
+    else:
+        print('Transformation aborted')
 
     return {'StepId': step_id, 'Status': step_status}
 
@@ -175,12 +179,6 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
                 transformation_step_name = f'Luminex_' + transformation_script_name
                 scripts_path = f"s3://{s3_bucket_temp}/scripts/transformation/{transformation_script}"
 
-                print(source_path)
-                print(transformation_output_path)
-                print(scripts_path)
-
-                print(transformation_step_name)
-                print(emr_cluster_id)
                 submit_spark_job(aws_access_key_id, 
                                  aws_secret_access_key, 
                                  aws_session_token,
@@ -191,7 +189,6 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
                                  source_path,
                                  transformation_output_path)
                 source_path = transformation_output_path
-                print(source_path)
 
         except Exception as e:
             print(f"Error: {e}")
