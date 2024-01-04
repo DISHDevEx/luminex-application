@@ -5,6 +5,7 @@ import json
 import time
 import boto3
 import zipfile
+import os
 from validation import IAMRoleValidator
 
 # get repo root level
