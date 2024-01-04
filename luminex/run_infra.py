@@ -4,7 +4,7 @@ import requests
 import json
 import time
 import boto3
-
+import zipfile
 from validation import IAMRoleValidator
 
 # get repo root level
@@ -118,7 +118,108 @@ def read_config(file_path='../config/infra_config.json'):
         config_data = json.load(config_file)
     return config_data
 #
+def get_latest_workflow_run_id(organization, repository, workflow_name, token):
+    url = f'https://api.github.com/repos/{organization}/{repository}/actions/workflows/{workflow_name}/runs'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
 
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        if data['workflow_runs']:
+            # Assuming the first run is the latest one
+            latest_run = data['workflow_runs'][0]
+            return latest_run['id']
+        else:
+            return None
+    else:
+        print(f'Error: {response.status_code}, {response.text}')
+        return None
+
+def get_workflow_run_details(owner, repo, run_id, github_token):
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}'
+    headers = {
+        'Authorization': f'Bearer {github_token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        return f'Error: {response.status_code}, {response.text}'
+
+def print_step_logs(organization, repository, workflow_run_id, token):
+    jobs_url = f'https://api.github.com/repos/{organization}/{repository}/actions/runs/{workflow_run_id}/jobs'
+    print(jobs_url)
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
+    response = requests.get(jobs_url, headers=headers)
+    print(f"job-response-code:{response.status_code}")
+
+    if response.status_code == 200:
+        jobs_data = response.json().get('jobs', [])
+        #print(jobs_data)
+        for job in jobs_data:
+            job_name = job.get('name', '')
+            job_status = job.get('conclusion', '')
+                #print(f'Job "{job_name}" failed! Fetching logs and checking steps...')
+            
+            step_failure_list = []
+            for step in job["steps"]:
+                step_name = step["name"]
+                step_status = step["conclusion"]
+                print(f" Step : {step_name} :{step_status}")
+                if step_status == "failure" :
+                    step_failure_list.append(step_name)
+
+                    failure_step = step_name
+            check_run_url = job["check_run_url"]
+            get_failure_msgs_details = requests.get(check_run_url, headers = headers)
+            annotion_url = get_failure_msgs_details.json()["output"]["annotations_url"]
+            if len(step_failure_list) !=0:
+                failure_response = requests.get(annotion_url, headers=headers)
+                workflow_message = failure_response.json()[0]["message"]
+                print(f"Github workflow failed at {failure_step} step  with error message : {workflow_message}. Check dowloaded logs for more details")
+                get_workflow_run_logs(organization, repository, workflow_run_id, token)
+                return workflow_message
+            else:
+                workflow_message = "success"
+                print("workflow successfully ran")
+                return workflow_message
+
+    else:
+        print(f'Failed to fetch jobs. Status code: {response.status_code}')
+
+
+
+def get_workflow_run_logs(owner, repo, run_id, token):
+    url = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/logs"
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        zip_file_path = os.path.join('downloaded_file.zip')
+        with open(zip_file_path, 'wb') as f:
+            f.write(response.content)
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            zip_ref.extractall()
+        return response.status_code
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+        return None
 
 def trigger_workflow(organization, repository, workflow_name, event_type, aws_region, token, inputs=None):
 
@@ -161,6 +262,26 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
 
     if response.status_code == 204:
         print(f'Response status code: {response.status_code}, Workflow triggered successfully.')
+        latest_run_id = get_latest_workflow_run_id(organization, repository, workflow_name, token)
+        if latest_run_id is not None:
+            print(f'Latest Workflow Run ID: {latest_run_id}')
+            workflow_run_details = get_workflow_run_details(organization, repository, latest_run_id, token)
+            if workflow_run_details is not None:
+                conclusion = workflow_run_details['conclusion']
+                print(f'Worflow status : {conclusion}')
+
+                if 'conclusion' in workflow_run_details:
+                    
+                    if conclusion == 'failure':
+                        print('Workflow failed!')
+                        failure_reason = print_step_logs(organization, repository, latest_run_id, token)
+                        return failure_reason
+                        
+
+        
+        else:
+            print('Failed to retrieve the latest Workflow Run ID.')
+            return None
     else:
         print(f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, Content: {response.text}')
         return None
@@ -174,6 +295,8 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
 
     return None
 #
+
+
 
 
 def run_infra(pat, stack_name):
