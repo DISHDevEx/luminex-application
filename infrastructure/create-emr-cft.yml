@@ -27,7 +27,7 @@ Parameters:
   EMRApplications:
     Type: String # CommaDelimitedList
     Description: The applications to install on this cluster, for example, Spark, Flink, Oozie, Zeppelin, and so on. Please use the correct letter case, e.g. TensorFlow, Spark instead of tensorflow, spark.
-    Default: "Hadoop,Hive,Livy,Spark,TensorFlow,Trino,ZooKeeper,JupyterEnterpriseGateway"
+    #Default: "Hadoop,Hive,Livy,Spark,TensorFlow,Trino,ZooKeeper,JupyterEnterpriseGateway"
   EMRReleaseLabel:
     Description: "The EMR Release"
     Type: String
