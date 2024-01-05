@@ -7,10 +7,7 @@
       "ParameterKey": "EMRReleaseLabel",
       "ParameterValue": "emr-6.12.0"
     },
-    {
-      "ParameterKey": "EMRSubnetId",
-      "ParameterValue": "subnet-0afabb1a17a1ca011"
-    },
+    
     {
       "ParameterKey": "EMRTerminationProtected",
       "ParameterValue": "false"
@@ -151,14 +148,7 @@
       "ParameterKey": "EMRUnitType",
       "ParameterValue": "Instances"
     },
-    {
-      "ParameterKey": "SagemakerStudioSecurityGroupId",
-      "ParameterValue": "sg-09141b3415e566e1a"
-    },
-    {
-      "ParameterKey": "SagemakerStudioSubnetId",
-      "ParameterValue": "subnet-0afabb1a17a1ca011"
-    },
+    
     {
       "ParameterKey": "SageMakerProjectId",
       "ParameterValue": "projectid"
