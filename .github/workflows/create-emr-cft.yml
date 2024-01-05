@@ -61,17 +61,22 @@ jobs:
       
       - name: Deploy EMR cluster
         run: |
+          set -e  # Add this line to exit on error
+          parameters_json=$(cat ./infrastructure/config_parameter.json | jq -c '.')
           stack_id=$(aws cloudformation create-stack \
-            --stack-name ${{github.event.client_payload.inputs.stack-name}} \
+            --stack-name ${{ github.event.client_payload.inputs.stack-name }} \
             --template-body file://./infrastructure/create-emr-cft.yml \
-            --parameters file://./infrastructure/config_parameter.json \
+            --cli-input-json "{\"Parameters\": ${parameters_json}, \"Capabilities\": [\"CAPABILITY_IAM\", \"CAPABILITY_NAMED_IAM\", \"CAPABILITY_AUTO_EXPAND\"], \"RoleARN\": \"${{ secrets.CICD_CFT_ROLE }}\"}" \
+            --parameters \
               ParameterKey=EMRSubnetId,ParameterValue=${{ secrets.EMRSubnetId }} \
-              ParameterKey=SagemakerStudioSecurityGroupId,ParameterValue=${{ secrets.SagemakerStudioSecurityGroupId }}
-              ParameterKey=SagemakerStudioSubnetId,ParameterValue=${{ secrets.EMRSubnetId }}
-            --role-arn ${{ secrets.CICD_CFT_ROLE}}\
-            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+              ParameterKey=SagemakerStudioSecurityGroupId,ParameterValue=${{ secrets.SagemakerStudioSecurityGroupId }} \
+              ParameterKey=SagemakerStudioSubnetId,ParameterValue=${{ secrets.EMRSubnetId }} \
             | jq -r '.StackId')
           echo "CloudFormation stack ID: $stack_id"
+          if [ -z "$stack_id" ]; then
+            echo "Failed to deploy EMR cluster. Exiting..."
+            exit 1
+          fi
       
       - name: Check if S3 bucket exists
         id: check_bucket
