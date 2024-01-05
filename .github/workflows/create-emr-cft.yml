@@ -65,6 +65,8 @@ jobs:
             --stack-name ${{github.event.client_payload.inputs.stack-name}} \
             --template-body file://./infrastructure/create-emr-cft.yml \
             --parameters file://./infrastructure/config_parameter.json \
+              ParameterKey=EMRSubnetId,ParameterValue=${{ secrets.EMRSubnetId }} \
+              ParameterKey=SagemakerStudioSecurityGroupId,ParameterValue=${{ secrets.SagemakerStudioSecurityGroupId }}
             --role-arn ${{ secrets.CICD_CFT_ROLE}}\
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             | jq -r '.StackId')

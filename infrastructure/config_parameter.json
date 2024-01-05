@@ -1,7 +1,7 @@
 [
     {
-      "ParameterKey": "EMRApplications",
-      "ParameterValue": "Hadoop,Hive,Livy,Spark,TensorFlow,Trino,ZooKeeper,JupyterEnterpriseGateway"
+    "ParameterKey": "EMRApplications",
+    "ParameterValue": "Hadoop,Hive,Spark,JupyterEnterpriseGateway"
     },
     {
       "ParameterKey": "EMRReleaseLabel",
