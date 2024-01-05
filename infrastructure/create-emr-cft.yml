@@ -35,7 +35,7 @@ Parameters:
   EMRSubnetId:
     Description: "The subnet for the EMR Cluster"
     Type: String
-    Default: "subnet-0afabb1a17a1ca011"
+    Default: "subnet-xxx"
   EMRTerminationProtected:
     Description: "Protect your EC2 instances from accidental termination"
     Type: String
@@ -197,11 +197,11 @@ Parameters:
   SagemakerStudioSecurityGroupId: # This can be hardcoded by DevOps Admin
     Type: String
     Description: Security group id.
-    Default: sg-09141b3415e566e1a
+    Default: sg-xx
   SagemakerStudioSubnetId:  # This can be hardcoded by DevOps Admin
     Type: String
     Description: Subnet id.
-    Default: subnet-0afabb1a17a1ca011
+    Default: subnet-xxx
   SageMakerProjectId:
     Type: String
     Description: Service generated Id of the project.
