@@ -65,7 +65,47 @@ jobs:
             --stack-name ${{github.event.client_payload.inputs.stack-name}} \
             --template-body file://./infrastructure/create-emr-cft.yml \
             --parameters file://./infrastructure/config_parameter.json \
-            --role-arn arn:aws:iam::355648722862:role/dish-dp-CICDAcctCodePipelineCloudFormationRole\
+            --role-arn ${{ secrets.CICD_CFT_ROLE}}\
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             | jq -r '.StackId')
           echo "CloudFormation stack ID: $stack_id"
+      
+      - name: Check if S3 bucket exists
+        id: check_bucket
+        run: |
+          bucket_name=luminex-application-logs
+          if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
+            echo "Bucket $bucket_name already exists."
+            echo "::set-output name=bucket_exists::true"
+          else
+            echo "Bucket $bucket_name does not exist."
+            echo "::set-output name=bucket_exists::false"
+          fi
+
+      - name: Create S3 bucket if it doesn't exist
+        if: steps.check_bucket.outputs.bucket_exists == 'false'
+        run: |
+          bucket_name=luminex-application-files
+          aws s3api create-bucket --bucket luminex-application-files --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+
+      - name: Check and Create 'scripts' folder
+        run: |
+          bucket_name=luminex-application-files
+          folder_key=scripts/
+          if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
+            echo "Folder $folder_key already exists."
+          else
+            echo "Folder $folder_key does not exist. Creating..."
+            aws s3api put-object --bucket $bucket_name --key $folder_key
+          fi
+
+      - name: Check and Create 'temp-etl-data' folder
+        run: |
+          bucket_name=luminex-application-files
+          folder_key=temp-etl-data/
+          if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
+            echo "Folder $folder_key already exists."
+          else
+            echo "Folder $folder_key does not exist. Creating..."
+            aws s3api put-object --bucket $bucket_name --key $folder_key
+          fi
