@@ -17,6 +17,10 @@
       "ParameterValue": "luminex-emr-cft"
     },
     {
+      "ParameterKey": "EMRCustomAmiId",
+      "ParameterValue": ""
+    },
+    {
       "ParameterKey": "EMRClusterConfiguration",
       "ParameterValue": "instance_group"
     },
