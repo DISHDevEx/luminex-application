@@ -78,34 +78,40 @@ jobs:
           aws s3api create-bucket --bucket luminex-application-files --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
 
       - name: Check and Create Folders
-      run: |
-        bucket_name=luminex-application-files
-        folders=("temp-etl-data/" "bootstrap/" "configurations/" "emr-logs/" "scripts/")
+        run: |
+          bucket_name=luminex-application-files
+          folders=("temp-etl-data/" "bootstrap/" "configurations/" "emr-logs/" "scripts/")
 
-        for folder_key in "${folders[@]}"; do
-          if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
-            echo "Folder $folder_key already exists."
-          else
-            echo "Folder $folder_key does not exist. Creating..."
-            aws s3api put-object --bucket $bucket_name --key $folder_key
-          fi
-        done
+          for folder_key in "${folders[@]}"; do
+            if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
+              echo "Folder $folder_key already exists."
+            else
+              echo "Folder $folder_key does not exist. Creating..."
+              aws s3api put-object --bucket $bucket_name --key $folder_key
+            fi
+          done
       
-      - name: Upload File to S3 bootstrap folder
-      run: |
-        bucket_name=luminex-application-files
-        source_file_path= file://./infrastructure/luminex-bootstrap.sh  # Update with the actual file path in your repository
-        s3_key=bootstrap/luminex-bootstrap.sh                 # Update with the desired S3 key
+      - name: Grant execute permission to the bootstrap script
+        run: |
+          chmod +x $GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
 
-        aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+      - name: Upload Bootstrap Script to S3
+        run: |
+          bucket_name=luminex-application-files
+          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
+          s3_key=bootstrap/luminex-bootstrap.sh
+
+          aws s3 cp $source_file_path s3://$bucket_name/$s3_key
       
-      - name: Upload File to S3 bootstrap folder
-      run: |
-        bucket_name=luminex-application-files
-        source_file_path= file://./infrastructure/luminex-configurations.yaml  # Update with the actual file path in your repository
-        s3_key=bootstrap/luminex-configurations.yaml                # Update with the desired S3 key
+      - name: Upload File to S3
+        run: |
+          bucket_name=luminex-application-files
+          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-configurations.yaml
+          s3_key=configurations/luminex-configurations.yaml
 
-        aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+          aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+      
+      
       
       - name: Deploy EMR cluster
         run: |
