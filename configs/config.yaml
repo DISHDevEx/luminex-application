@@ -1,8 +1,5 @@
 AWS:
-  ACCESS_KEY_ID: 
-  SECRET_ACCESS_KEY: 
-  SESSION_TOKEN: 
-  REGION: 
+  REGION: us-east-1
 
 VALIDATION: 
   PERMISSIONS:
@@ -24,9 +21,9 @@ ETL:
   S3_BUCKET_TEMP: luminex-application-files
   TRANSFORMATION_FOLDER_PATH: DISHDevEx/luminex-transformation
 
-EXPERIMENT:
+TEST:
   META:
-    NAME: MyFirstExperiment
+    NAME: MLExperiment
   MODEL:
     FAMILY: resnet
     N_LAYERS: 151
@@ -35,5 +32,5 @@ EXPERIMENT:
         - CloudWatchFullAccess
         - AmazonEC2FullAccess
   TRAINING:
-    BATCH_SIZE: 256
-    EPOCHS: 10000
+    BATCH_SIZE: 128
+    EPOCHS: 1000

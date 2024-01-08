@@ -1,7 +1,7 @@
-
 import sys
 import boto3
 import os
+
 
 def stack_exists(input_stack_name):
     """
@@ -27,6 +27,7 @@ def stack_exists(input_stack_name):
         else:
             raise Exception("Value error")
 
+
 if __name__ == "__main__":
 
     input_stack_name = os.getenv('stack-name')
@@ -39,5 +40,3 @@ if __name__ == "__main__":
     else:
         print(f"Stack '{input_stack_name}' does not exist.")
         sys.exit(0)  # Exit with failure status
-
-

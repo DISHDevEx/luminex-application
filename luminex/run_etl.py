@@ -9,17 +9,19 @@ from github.GithubException import UnknownObjectException
 from validation import ETLFileValidator
 from validation import ETLS3Validator
 
-# get repo root level
-root_path = subprocess.run(
-    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
-).stdout.rstrip("\n")
-# add repo path to use all libraries
-sys.path.append(root_path)
-
 from configs import Config
 
+# # get repo root level
+# root_path = subprocess.run(
+#     ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
+# ).stdout.rstrip("\n")
+# # add repo path to use all libraries
+# sys.path.append(root_path)
+
+# from configs import Config
+
 # Declare Global Variable
-cfg = Config('../configs/config.yaml')
+cfg = Config('configs/config.yaml')
 
 
 def clone_private_repo(repo_url, local_repo_path, token):
@@ -112,7 +114,7 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
             Parameters:
                     emr_cluster_id (str): The emr cluster id to which the spark jobs should be added
                     pat ( str): GitHub token to get access to the Repo
-                    team_name : team name used to seperate data stored in the temporary s3 bucket 
+                    team_name : team name used to separate data stored in the temporary s3 bucket
                     num_transformations (int): No of transformations that needs to be performed on the dataset
                     transformation_names (list): The list of transformations
                     ENV: aws_access_key_id (str): AWS Temp Credentials: Access Key ID
@@ -120,15 +122,15 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
                     ENV: aws_session_token (str): AWS Temp Credentials: Session Token
     """
     # Access environment variables
-    aws_access_key_id = cfg.get('aws/access_key_id')
-    aws_secret_access_key = cfg.get('aws/secret_access_key')
-    aws_session_token = cfg.get('aws/session_token')
+    aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    aws_session_token = os.environ.get('AWS_SESSION_TOKEN')
 
     if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         print("Please set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN environment variables.")
         return
 
-    #ETL Validations
+    # ETL Validations
     s3_validator = ETLS3Validator(source_path, destination_bucket)
     s3_validator.run_validation()
     etl_file_validator = ETLFileValidator(cfg, pat, transformation_names)
@@ -169,24 +171,24 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
             # Step 1: Run transformations
             for i, transformation_script_name in enumerate(transformation_names, start=1):
                 print(f'Executing {i}/{num_transformations} Transformations...')
-                if  i == num_transformations:
+                if i == num_transformations:
                     # transformation_output_path = destination_bucket + transformation_script_name + '_output/'
                     transformation_output_path = f"s3://{destination_bucket}/{transformation_script_name}_output/"
                 else:
                     # transformation_output_path = s3_bucket_temp + 'temp-etl-data'+ folder + transformation_script_name + '_output/'
                     transformation_output_path = f"s3://{s3_bucket_temp}/temp-etl-data/{folder}/{transformation_script_name}_output/"
-                
+
                 transformation_script = transformation_script_name + '.py'
                 transformation_step_name = f'Luminex_' + transformation_script_name
                 scripts_path = f"s3://{s3_bucket_temp}/scripts/transformation/{transformation_script}"
 
-                submit_spark_job(aws_access_key_id, 
-                                 aws_secret_access_key, 
+                submit_spark_job(aws_access_key_id,
+                                 aws_secret_access_key,
                                  aws_session_token,
-                                 region_name, 
-                                 emr_cluster_id, 
-                                 transformation_step_name, 
-                                 scripts_path, 
+                                 region_name,
+                                 emr_cluster_id,
+                                 transformation_step_name,
+                                 scripts_path,
                                  source_path,
                                  transformation_output_path)
                 source_path = transformation_output_path

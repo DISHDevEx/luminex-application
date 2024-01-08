@@ -52,7 +52,6 @@ class S3DataLoader:
         self.client = boto3.client('s3')
         self.resource = boto3.resource('s3')
 
-
     def read_csv_from_s3(self, key):
         """
         Reads a CSV file from an S3 bucket and returns a Pandas DataFrame.
@@ -173,6 +172,5 @@ class S3DataLoader:
 
 
 if __name__ == "__main__":
-
     data_loader = S3DataLoader()
     data_loader.main()
