@@ -26,32 +26,25 @@ Parameters:
   #   Type: String
   EMRApplications:
     Type: String # CommaDelimitedList
-    Description: The applications to install on this cluster, for example, Spark, Flink, Oozie, Zeppelin, and so on. Please use the correct letter case, e.g. TensorFlow, Spark instead of tensorflow, spark.
-    Default: "Hadoop,Hive,Livy,Spark,TensorFlow,Trino,ZooKeeper,JupyterEnterpriseGateway"
+    Description: The applications to install on this cluster, for example, Spark, Flink, Oozie, Zeppelin, and so on. Please use the correct letter case, e.g. TensorFlow, Spark instead of tensorflow, spark. 
   EMRReleaseLabel:
     Description: "The EMR Release"
     Type: String
-    Default: "emr-6.12.0"
   EMRSubnetId:
     Description: "The subnet for the EMR Cluster"
-    Type: String
-    Default: "subnet-0afabb1a17a1ca011"
+    Type: String  
   EMRTerminationProtected:
     Description: "Protect your EC2 instances from accidental termination"
-    Type: String
-    Default: "false"
+    Type: String  
   EMRClusterName:
     Description: The name of the EMR Cluster
-    Type: String
-    Default: "luminex-emr-cft"
+    Type: String 
   EMRCustomAmiId:
     Description: The custom AMI Id for Operating Systems
     Type: String
-    Default: ""
   EMRClusterConfiguration:
     Description: The EMR Configuration you would like to choose (Instance groups or Instance fleets)
     Type: String
-    Default: instance_group
     AllowedValues:
       - instance_group
       - instance_fleet
@@ -59,113 +52,86 @@ Parameters:
   EMRTagKey1:
     Description: The key of the Tag
     Type: String
-    Default: "for-use-with-amazon-emr-managed-policies"
   EMRTagValue1:
     Description: The value of the Tag
     Type: String
-    Default: "true"
   EMRTagKey2:
     Description: The key of the Tag
     Type: String
-    Default: "EMRTagKey2"
   EMRTagValue2:
     Description: The value of the Tag
     Type: String
-    Default: "EMRTagValue2"
   EMRTagKey3:
     Description: The key of the Tag
     Type: String
-    Default: "EMRTagKey3"
   EMRTagValue3:
     Description: The value of the Tag
     Type: String
-    Default: "EMRTagValue3"
   EMRVisibleToAllUsers:
     Description: Indicates whether the cluster is visible to all IAM users of the AWS account
     Type: String
-    Default: true
   EMRStepConcurrencyLevel:
     Description: Specifies the number of steps that can be executed concurrently
     Type: Number
-    Default: 100
     MinValue: 1
     MaxValue: 256
   EMRSecurityConfiguration:
     Description: The name of the security configuration applied to the cluster.
     Type: String
-    Default: ""
   EMRIdealTimeOut:
     Description: The time the cluster should get automatically terminated
     Type: Number
-    Default: 1800
   EMRBootstrapActionsName:
     Description: The name of the BootstapAction Name
     Type: String
-    Default: "Bootstrap"
   EMRBootstrapActionsScriptS3Path:
     Description: The s3 path where the Bootstrap file is present
     Type: String
-    Default: "s3://luminex-s3-test/bootstrap/luminex-bootstrap.sh"
   EMRConfigurationsScriptS3Path:
     Type: String
     Description: The path to the Amazon S3 location where the configurations script is stored.
-    Default: "s3://luminex-s3-test/configurations/luminex-configurations.yaml"
   EMREbsRootVolumeSize:
     Type: Number
     Description: The size, in GiB, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 4.x and later.
-    Default: 64
   EMRCoreInstanceGroupName:
     Type: String
     Description: Friendly name given to the core instance group.
-    Default: "cfnCore"
   EMRCoreInstanceGroupInstanceCount:
     Type: Number
     Description: Target number of instances for the core instance group.
-    Default: 1
   EMRCoreInstanceGroupInstanceType:
     Type: String
     Description: The Amazon EC2 instance type for all instances in the core instance group.
-    Default: m5.xlarge
   EMRCoreInstanceGroupMarket:
     Type: String
     Description: Market type of the Amazon EC2 instances used to create a core cluster node.
-    Default: ON_DEMAND
   EMRMasterInstanceGroupName:
     Type: String
     Description: Friendly name given to the master instance group.
-    Default: "cfnMaster"
   EMRMasterInstanceGroupInstanceCount:
     Type: Number
     Description: Target number of instances for the master instance group.
-    Default: 1
   EMRMasterInstanceGroupInstanceType:
     Type: String
     Description: The Amazon EC2 instance type for all instances in the master instance group.
-    Default: m5.xlarge
   EMRMasterInstanceGroupMarket:
     Type: String
     Description: Market type of the Amazon EC2 instances used to create a master cluster node.
-    Default: ON_DEMAND
   EMRTaskInstanceGroupName:
     Type: String
     Description: Friendly name given to the master task group.
-    Default: "cfnTask"
   EMRTaskInstanceGroupInstanceCount:
     Type: Number
     Description: Target number of instances for the task instance group.
-    Default: 1
   EMRTaskInstanceGroupInstanceType:
     Type: String
     Description: The Amazon EC2 instance type for all instances in the task instance group.
-    Default: m5.xlarge
   EMRTaskInstanceGroupMarket:
     Type: String
     Description: Market type of the Amazon EC2 instances used to create a task cluster node.
-    Default: ON_DEMAND
   EMRAutoScalingRole:
     Type: String
     Description: An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides permissions that the automatic scaling feature requires to launch and terminate Amazon EC2 instances in an instance group.
-    Default: EMR_AutoScaling_DefaultRole
   # EMRStepsScriptS3Path:
   #   Type: String
   #   Description: The path to the Amazon S3 location where the step script is stored.
@@ -173,23 +139,18 @@ Parameters:
   EMRMaximumCapacityUnits:
     Type: Number
     Description: The upper boundary of Amazon EC2 units. The limit only applies to the core and task nodes.
-    Default: 4
   EMRMaximumCoreCapacityUnits:
     Type: Number
     Description: The upper boundary of Amazon EC2 units for core node type in a cluster
-    Default: 4
   EMRMaximumOnDemandCapacityUnits:
     Type: Number
     Description: The upper boundary of On-Demand Amazon EC2 units.
-    Default: 4
   EMRMinimumCapacityUnits:
     Type: Number
     Description: The lower boundary of Amazon EC2 units.
-    Default: 1
   EMRUnitType:
     Type: String
     Description: The unit type used for specifying a managed scaling policy.
-    Default: Instances
     AllowedValues:
       - InstanceFleetUnits
       - Instances
@@ -197,19 +158,15 @@ Parameters:
   SagemakerStudioSecurityGroupId: # This can be hardcoded by DevOps Admin
     Type: String
     Description: Security group id.
-    Default: sg-09141b3415e566e1a
   SagemakerStudioSubnetId:  # This can be hardcoded by DevOps Admin
     Type: String
     Description: Subnet id.
-    Default: subnet-0afabb1a17a1ca011
   SageMakerProjectId:
     Type: String
     Description: Service generated Id of the project.
-    Default: "projectid"
   SageMakerProjectName:
     Type: String
     Description: Name of the project
-    Default: "projectname"
 
 Conditions:
   ShouldUseInstanceFleet: !Equals
