@@ -73,7 +73,7 @@
     },
     {
       "ParameterKey": "EMRConfigurationsScriptS3Path",
-      "ParameterValue": ""
+      "ParameterValue": "s3://luminex-application-files/configurations/luminex-configurations.yaml"
     },
     {
       "ParameterKey": "EMREbsRootVolumeSize",
