@@ -119,6 +119,7 @@ def read_config(file_path='../config/infra_config.json'):
         config_data = json.load(config_file)
     return config_data
 
+
 def get_latest_workflow_run_id(organization, repository, workflow_name, token):
     """
     Retrieve the ID of the latest run for a specified GitHub Actions workflow.
@@ -158,6 +159,7 @@ def get_latest_workflow_run_id(organization, repository, workflow_name, token):
     else:
         print(f'Error: {response.status_code}, {response.text}')
         return None
+
 
 def get_workflow_run_details(owner, repo, run_id, github_token):
     """
@@ -220,7 +222,7 @@ def print_step_logs(organization, repository, workflow_run_id, token):
     """
 
     jobs_url = f'https://api.github.com/repos/{organization}/{repository}/actions/runs/{workflow_run_id}/jobs'
-    print(jobs_url)
+
     headers = {
         'Authorization': f'Bearer {token}',
         'Accept': 'application/vnd.github.v3+json'
@@ -231,7 +233,6 @@ def print_step_logs(organization, repository, workflow_run_id, token):
 
     if response.status_code == 200:
         jobs_data = response.json().get('jobs', [])
-        #print(jobs_data)
         for job in jobs_data:
             job_name = job.get('name', '')
             job_status = job.get('conclusion', '')
@@ -356,11 +357,8 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
                 print(f'Worflow status : {conclusion}')
 
                 if 'conclusion' in workflow_run_details:
-                    
-                    if conclusion == 'failure':
-                        print('Workflow failed!')
-                        failure_reason = print_step_logs(organization, repository, latest_run_id, token)
-                        return failure_reason
+                    failure_reason = print_step_logs(organization, repository, latest_run_id, token)
+                    return failure_reason
                         
         else:
             print('Failed to retrieve the latest Workflow Run ID.')
