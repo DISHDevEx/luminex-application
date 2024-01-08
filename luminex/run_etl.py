@@ -96,18 +96,23 @@ def submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token
 
         time.sleep(20)
 
-    print(f'Transformation executed, refer to {s3_output_path} for the transformed output.')
+    if step_status == 'COMPLETED':
+        print(f'Transformation executed, refer to {s3_output_path} for the transformed output.')
+
+    else:
+        print('Transformation aborted')
 
     return {'StepId': step_id, 'Status': step_status}
 
 
-def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, source_path, destination_bucket):
+def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_names, source_path, destination_bucket):
     """
     Main function that triggers required functions in the required order to run the transformation on the EMR Cluster.
 
             Parameters:
                     emr_cluster_id (str): The emr cluster id to which the spark jobs should be added
                     pat ( str): GitHub token to get access to the Repo
+                    team_name : team name used to seperate data stored in the temporary s3 bucket 
                     num_transformations (int): No of transformations that needs to be performed on the dataset
                     transformation_names (list): The list of transformations
                     ENV: aws_access_key_id (str): AWS Temp Credentials: Access Key ID
@@ -133,7 +138,7 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
     emr_cluster_id = emr_cluster_id
     # config = read_config('../config/etl_config.json')
     github_token = pat
-    region_name = cfg.get('etl/aws_region', 'aws-region')
+    region_name = cfg.get('aws/region', 'aws-region')
     if num_transformations == len(transformation_names):
         try:
             github_repo_url = cfg.get('etl/transformation_folder_path')
@@ -141,7 +146,7 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
             # Cloning the GitHub repository
             local_repo_path = clone_private_repo(github_repo_url, "local_transformation_repo", github_token)
 
-            s3_input_bucket_name = cfg.get('etl/s3_input_bucket_name', 'name-of-s3-bucket')
+            s3_bucket_temp = cfg.get('etl/s3_bucket_temp', 'name-of-s3-temp-bucket')
 
             # Initializing the S3 client
             s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,
@@ -155,30 +160,36 @@ def run_etl(emr_cluster_id, pat, num_transformations, transformation_names, sour
                         if file.startswith(name):
                             file_path = os.path.join(root, file)
                             s3_object_key = f'scripts/transformation/{file}'
-                            s3.upload_file(file_path, s3_input_bucket_name, s3_object_key)
-                            print(f"Uploaded {file_path} to S3: s3://{s3_input_bucket_name}/{s3_object_key}")
+                            s3.upload_file(file_path, s3_bucket_temp, s3_object_key)
+                            print(f"Uploaded {file_path} to S3: s3://{s3_bucket_temp}/{s3_object_key}")
+                            print(file_path)
 
-            s3_bucket_input_path = cfg.get('etl/s3_bucket_input_path', 'path-to-s3-bucket')
-            s3_bucket_temp_output_path = cfg.get('etl/s3_bucket_temp_output_path', 'path-to-temporary-s3-bucket')
-            transformation_folder = cfg.get('etl/transformation_folder', 'path-to-s3-transformation_folder')
-            s3_bucket_final_output_path = cfg.get('etl/s3_bucket_final_output_path', 'path-to-temporary-s3-bucket')
-            input_folder = cfg.get('etl/input_folder')
-            boat = cfg.get('etl/boat', 'name-for-temp-files-to-be-stored')
+            folder = team_name
 
             # Step 1: Run transformations
             for i, transformation_script_name in enumerate(transformation_names, start=1):
                 print(f'Executing {i}/{num_transformations} Transformations...')
-                transformation_output_path = s3_bucket_temp_output_path + boat + \
-                                             transformation_script_name + '_output/' \
-                    if i != num_transformations else s3_bucket_final_output_path + \
-                                                     transformation_script_name + '_output/'
+                if  i == num_transformations:
+                    # transformation_output_path = destination_bucket + transformation_script_name + '_output/'
+                    transformation_output_path = f"s3://{destination_bucket}/{transformation_script_name}_output/"
+                else:
+                    # transformation_output_path = s3_bucket_temp + 'temp-etl-data'+ folder + transformation_script_name + '_output/'
+                    transformation_output_path = f"s3://{s3_bucket_temp}/temp-etl-data/{folder}/{transformation_script_name}_output/"
+                
                 transformation_script = transformation_script_name + '.py'
                 transformation_step_name = f'Luminex_' + transformation_script_name
-                submit_spark_job(aws_access_key_id, aws_secret_access_key, aws_session_token,
-                                 region_name, emr_cluster_id, transformation_step_name, s3_bucket_input_path +
-                                 transformation_folder + transformation_script, input_folder,
+                scripts_path = f"s3://{s3_bucket_temp}/scripts/transformation/{transformation_script}"
+
+                submit_spark_job(aws_access_key_id, 
+                                 aws_secret_access_key, 
+                                 aws_session_token,
+                                 region_name, 
+                                 emr_cluster_id, 
+                                 transformation_step_name, 
+                                 scripts_path, 
+                                 source_path,
                                  transformation_output_path)
-                input_folder = transformation_output_path
+                source_path = transformation_output_path
 
         except Exception as e:
             print(f"Error: {e}")
