@@ -70,11 +70,11 @@
     },
     {
       "ParameterKey": "EMRBootstrapActionsScriptS3Path",
-      "ParameterValue": "s3://luminex-s3-test/bootstrap/luminex-bootstrap.sh"
+      "ParameterValue": "s3://luminex-application-files/configurations/luminex-configurations.yaml"
     },
     {
       "ParameterKey": "EMRConfigurationsScriptS3Path",
-      "ParameterValue": "s3://luminex-s3-test/configurations/luminex-configurations.yaml"
+      "ParameterValue": "s3://luminex-application-files/configurations/luminex-configurations.yaml"
     },
     {
       "ParameterKey": "EMREbsRootVolumeSize",
