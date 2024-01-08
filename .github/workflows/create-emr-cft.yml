@@ -59,6 +59,56 @@ jobs:
           echo $stack-name
           python luminex/validation/stack_name_validator.py
       
+      - name: Check if S3 bucket exists
+        id: check_bucket
+        run: |
+          bucket_name=luminex-application-logs
+          if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
+            echo "Bucket $bucket_name already exists."
+            echo "::set-output name=bucket_exists::true"
+          else
+            echo "Bucket $bucket_name does not exist."
+            echo "::set-output name=bucket_exists::false"
+          fi
+
+      - name: Create S3 bucket if it doesn't exist
+        if: steps.check_bucket.outputs.bucket_exists == 'false'
+        run: |
+          bucket_name=luminex-application-files
+          aws s3api create-bucket --bucket luminex-application-files --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+
+      - name: Check and Create Folders
+        run: |
+              bucket_name=luminex-application-files
+              folders=("temp-etl-data/" "bootstrap/" "configurations/" "emr-logs/" "scripts/")
+
+              for folder_key in "${folders[@]}"; do
+                if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
+                  echo "Folder $folder_key already exists."
+                else
+                  echo "Folder $folder_key does not exist. Creating..."
+                  aws s3api put-object --bucket $bucket_name --key $folder_key
+                fi
+              done
+      - name: Grant execute permission to the bootstrap script
+        run: |
+          chmod +x $GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
+
+      - name: Upload Bootstrap Script to S3
+        run: |
+          bucket_name=luminex-application-files
+          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
+          s3_key=bootstrap/luminex-bootstrap.sh
+
+          aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+      
+      - name: Upload File to S3
+        run: |
+          bucket_name=luminex-application-files
+          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-configurations.yaml
+          s3_key=configurations/luminex-configurations.yaml
+
+          aws s3 cp $source_file_path s3://$bucket_name/$s3_key
       
       - name: Deploy EMR cluster
         run: |
@@ -84,44 +134,4 @@ jobs:
           if [ -z "$stack_id" ]; then
             echo "Failed to deploy EMR cluster. Exiting..."
             exit 1
-          fi
-      
-      - name: Check if S3 bucket exists
-        id: check_bucket
-        run: |
-          bucket_name=luminex-application-logs
-          if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
-            echo "Bucket $bucket_name already exists."
-            echo "::set-output name=bucket_exists::true"
-          else
-            echo "Bucket $bucket_name does not exist."
-            echo "::set-output name=bucket_exists::false"
-          fi
-
-      - name: Create S3 bucket if it doesn't exist
-        if: steps.check_bucket.outputs.bucket_exists == 'false'
-        run: |
-          bucket_name=luminex-application-files
-          aws s3api create-bucket --bucket luminex-application-files --region ${{github.event.inputs.AWS_Region || 'us-east-1'}}
-
-      - name: Check and Create 'scripts' folder
-        run: |
-          bucket_name=luminex-application-files
-          folder_key=scripts/
-          if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
-            echo "Folder $folder_key already exists."
-          else
-            echo "Folder $folder_key does not exist. Creating..."
-            aws s3api put-object --bucket $bucket_name --key $folder_key
-          fi
-
-      - name: Check and Create 'temp-etl-data' folder
-        run: |
-          bucket_name=luminex-application-files
-          folder_key=temp-etl-data/
-          if aws s3api head-object --bucket $bucket_name --key $folder_key 2>/dev/null; then
-            echo "Folder $folder_key already exists."
-          else
-            echo "Folder $folder_key does not exist. Creating..."
-            aws s3api put-object --bucket $bucket_name --key $folder_key
           fi
