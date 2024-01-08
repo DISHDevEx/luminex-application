@@ -91,6 +91,22 @@ jobs:
           fi
         done
       
+      - name: Upload File to S3 bootstrap folder
+      run: |
+        bucket_name=luminex-application-files
+        source_file_path= file://./infrastructure/luminex-bootstrap.sh  # Update with the actual file path in your repository
+        s3_key=bootstrap/luminex-bootstrap.sh                 # Update with the desired S3 key
+
+        aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+      
+      - name: Upload File to S3 bootstrap folder
+      run: |
+        bucket_name=luminex-application-files
+        source_file_path= file://./infrastructure/luminex-configurations.yaml  # Update with the actual file path in your repository
+        s3_key=bootstrap/luminex-configurations.yaml                # Update with the desired S3 key
+
+        aws s3 cp $source_file_path s3://$bucket_name/$s3_key
+      
       - name: Deploy EMR cluster
         run: |
           stack_id=$(aws cloudformation create-stack \
