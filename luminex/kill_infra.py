@@ -3,23 +3,25 @@ This module defines a StackManager class for managing AWS CloudFormation stacks.
 It includes methods for checking the existence of a stack, deleting a stack, and
 running the stack deletion process.
 """
-import sys
 import time
 
 import boto3
 import botocore.exceptions
 
+
 class StackManager:
     """
     A class for managing AWS CloudFormation stacks.
     """
-    def __init__(self):
+
+    def __init__(self, stack_name=None):
         """
         Initializes the StackManager with an AWS CloudFormation client.
         """
         self.cloudformation = boto3.client('cloudformation')
+        self.stack_name = stack_name
 
-    def stack_exists(self, input_stack_name):
+    def stack_exists(self):
         """
         Check if a CloudFormation stack exists.
 
@@ -30,10 +32,10 @@ class StackManager:
             bool: True if the stack exists, False otherwise.
         """
         try:
-            response = self.cloudformation.describe_stacks(StackName=input_stack_name)
+            response = self.cloudformation.describe_stacks(StackName=self.stack_name)
             exists = len(response['Stacks']) > 0
             if exists:
-                print(f"Stack '{input_stack_name}' exists...")
+                print(f"Stack '{self.stack_name}' exists...")
             return exists
 
         except self.cloudformation.exceptions.ClientError as e:
@@ -41,13 +43,13 @@ class StackManager:
             error_message = e.response['Error']['Message']
 
             if error_code == 'ValidationError' and 'does not exist' in error_message:
-                print(f"Stack '{input_stack_name}' does not exist...")
+                print(f"Stack '{self.stack_name}' does not exist...")
                 return False
 
             print(f"Error: {str(e)}")
             return False
 
-    def delete_stack(self, input_stack_name):
+    def delete_stack(self):
         """
         Delete a CloudFormation stack.
 
@@ -56,7 +58,7 @@ class StackManager:
         """
         try:
             # Check if EMR cluster is running
-            emr_cluster_id = self.get_emr_cluster_id(input_stack_name)
+            emr_cluster_id = self.get_emr_cluster_id(self.stack_name)
             emr_cluster_id = emr_cluster_id.strip()
 
             if emr_cluster_id:
@@ -73,26 +75,26 @@ class StackManager:
                         return
 
             # Delete the CloudFormation stack
-            self.cloudformation.delete_stack(StackName=input_stack_name)
-            print(f"Stack deletion initiated. Stack Name: {input_stack_name}...")
+            self.cloudformation.delete_stack(StackName=self.stack_name)
+            print(f"Stack deletion initiated. Stack Name: {self.stack_name}...")
 
             waiter = self.cloudformation.get_waiter('stack_delete_complete')
-            waiter.wait(StackName=input_stack_name)
+            waiter.wait(StackName=self.stack_name)
 
             time.sleep(5)
 
             # Check if the stack deletion is successful
-            if self.is_stack_deleted(input_stack_name):
-                print(f"Stack {input_stack_name} deleted successfully...")
+            if self.is_stack_deleted(self.stack_name):
+                print(f"Stack {self.stack_name} deleted successfully...")
             else:
-                print(f"Failed to delete stack {input_stack_name}. "
-                    "Check the CloudFormation console for more details."
-)
+                print(f"Failed to delete stack {self.stack_name}. "
+                      "Check the CloudFormation console for more details."
+                      )
         except botocore.exceptions.WaiterError as e:
             print(f"Error waiting for stack deletion: {e}")
 
         except botocore.exceptions.ClientError as e:
-            print(f"Error deleting stack {input_stack_name}: {e}")
+            print(f"Error deleting stack {self.stack_name}: {e}")
 
     def get_emr_cluster_status(self, emr_cluster_id):
         """
@@ -108,15 +110,14 @@ class StackManager:
             emr = boto3.client('emr')
             response = emr.describe_cluster(ClusterId=emr_cluster_id)
             if ('Cluster' in response and
-                'Status' in response['Cluster'] and
-                'State' in response['Cluster']['Status']):
+                    'Status' in response['Cluster'] and
+                    'State' in response['Cluster']['Status']):
                 cluster_status = response['Cluster']['Status']['State']
                 return cluster_status
         except botocore.exceptions.ClientError as e:
             print(f"Error getting EMR cluster status: {e}")
 
         return 'unknown'
-
 
     def get_emr_cluster_id(self, stack_name):
         """
@@ -176,15 +177,11 @@ class StackManager:
         """
         Run the stack deletion process.
         """
-        if len(sys.argv) != 2:
-            print("Usage: python delete_stack.py <stack_name>")
-            sys.exit(1)
-        stack_name = sys.argv[1]
 
-        if self.stack_exists(stack_name):
-            self.delete_stack(stack_name)
+        if self.stack_exists():
+            self.delete_stack()
+
 
 if __name__ == "__main__":
-
     stack_manager = StackManager()
     stack_manager.run()
