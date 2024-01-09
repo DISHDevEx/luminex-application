@@ -5,8 +5,10 @@ from .validation import ETLFileValidator
 from .validation import IAMRoleValidator
 from .validation import ETLS3Validator
 
-from .kill_infra import StackManager
+from .delete_stack import StackManager
 
-from .run_etl import run_etl
+from .delete_infra import kill_infra
 
-from .run_infra import run_infra
+from .etl import run_etl
+
+from .infra_setup import run_infra

@@ -239,9 +239,9 @@ def print_step_logs(organization, repository, workflow_run_id, token):
                     failure_step = step_name
             check_run_url = job["check_run_url"]
             get_failure_msgs_details = requests.get(check_run_url, headers = headers)
-            annotion_url = get_failure_msgs_details.json()["output"]["annotations_url"]
+            annotation_url = get_failure_msgs_details.json()["output"]["annotations_url"]
             if len(step_failure_list) !=0:
-                failure_response = requests.get(annotion_url, headers=headers)
+                failure_response = requests.get(annotation_url, headers=headers)
                 workflow_message = failure_response.json()[0]["message"]
                 print(f"Github workflow failed at {failure_step} step  with error message : {workflow_message}. Check dowloaded logs for more details")
                 get_workflow_run_logs(organization, repository, workflow_run_id, token)
