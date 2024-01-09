@@ -1,10 +1,12 @@
-import os
-import sys
-import subprocess
 import requests
 import json
 import time
 import boto3
+import os
+import base64
+import binascii
+from base64 import b64encode
+from nacl import encoding, public
 import zipfile
 from validation import IAMRoleValidator
 from configs import Config
@@ -95,7 +97,8 @@ def fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws
                 raise
 
         print(
-            f'Retry {retry_count + 1}/{max_retries}. EMR Cluster creation in progress, waiting {retry_delay} seconds before fetching more details...')
+            f'Retry {retry_count + 1}/{max_retries}. EMR Cluster creation in progress, waiting {retry_delay}'
+            f' seconds before fetching more details...')
         time.sleep(retry_delay)
 
     print(f'Exceeded maximum retries. Failed to retrieve EMR Cluster ID. Please check the logs for more information.')
@@ -128,7 +131,7 @@ def get_latest_workflow_run_id(organization, repository, workflow_name, token):
         'Accept': 'application/vnd.github.v3+json'
     }
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=False)
 
     if response.status_code == 200:
         data = response.json()
@@ -171,7 +174,7 @@ def get_workflow_run_details(owner, repo, run_id, github_token):
         'Accept': 'application/vnd.github.v3+json'
     }
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=False)
 
     if response.status_code == 200:
         data = response.json()
@@ -210,7 +213,7 @@ def print_step_logs(organization, repository, workflow_run_id, token):
         'Accept': 'application/vnd.github.v3+json'
     }
 
-    response = requests.get(jobs_url, headers=headers)
+    response = requests.get(jobs_url, headers=headers, verify=False)
     print(f"job-response-code:{response.status_code}")
 
     if response.status_code == 200:
@@ -218,24 +221,24 @@ def print_step_logs(organization, repository, workflow_run_id, token):
         for job in jobs_data:
             job_name = job.get('name', '')
             job_status = job.get('conclusion', '')
-                #print(f'Job "{job_name}" failed! Fetching logs and checking steps...')
 
             step_failure_list = []
             for step in job["steps"]:
                 step_name = step["name"]
                 step_status = step["conclusion"]
                 print(f" Step : {step_name} :{step_status}")
-                if step_status == "failure" :
+                if step_status == "failure":
                     step_failure_list.append(step_name)
 
                     failure_step = step_name
             check_run_url = job["check_run_url"]
-            get_failure_msgs_details = requests.get(check_run_url, headers = headers)
+            get_failure_msgs_details = requests.get(check_run_url, headers=headers, verify=False)
             annotation_url = get_failure_msgs_details.json()["output"]["annotations_url"]
-            if len(step_failure_list) !=0:
-                failure_response = requests.get(annotation_url, headers=headers)
+            if len(step_failure_list) != 0:
+                failure_response = requests.get(annotation_url, headers=headers, verify=False)
                 workflow_message = failure_response.json()[0]["message"]
-                print(f"Github workflow failed at {failure_step} step  with error message : {workflow_message}. Check dowloaded logs for more details")
+                print(f"Github workflow failed at {failure_step} step  with error message : {workflow_message}. "
+                      f"Check downloaded logs for more details")
                 get_workflow_run_logs(organization, repository, workflow_run_id, token)
                 return workflow_message
             else:
@@ -273,7 +276,7 @@ def get_workflow_run_logs(owner, repo, run_id, token):
         "Authorization": f"Bearer {token}",
     }
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=False)
 
     if response.status_code == 200:
         zip_file_path = os.path.join('downloaded_file.zip')
@@ -286,6 +289,65 @@ def get_workflow_run_logs(owner, repo, run_id, token):
         print(f"Error: {response.status_code}")
         print(response.text)
         return None
+
+
+def create_github_secret(key_id, key, owner, repo, token, secret_name, secret_value):
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/secrets/{secret_name}'
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    data = {
+        'encrypted_value': encrypt(key, secret_value),
+        'key_id': key_id
+    }
+
+    response = requests.put(url, json=data, headers=headers, verify=False)
+
+    if response.status_code == 201:
+        print(f"Secret '{secret_name}' added successfully.")
+    elif response.status_code == 204:
+        print(f"Secret '{secret_name}' updated successfully.")
+    else:
+        print(f"Failed to add/update secret '{secret_name}'. Status code: {response.status_code}")
+        print(response.text)
+
+
+def get_github_public_key(owner, repo, token):
+    url = f'https://api.github.com/repos/{owner}/{repo}/actions/secrets/public-key'
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
+    response = requests.get(url, headers=headers, verify=False)
+
+    if response.status_code == 200:
+        key_data = response.json()
+        key_id = key_data['key_id']
+        key = key_data['key']
+
+        # If the key is not in PEM format, try to decode it
+        try:
+            decoded_key = base64.b64decode(key)
+            encoded_key = base64.b64encode(decoded_key).decode('utf-8')
+            return key_id, encoded_key
+        except binascii.Error as e:
+            print(f"Failed to decode key: {e}")
+            return None, None
+    else:
+        print(f"Failed, Status code: {response.status_code}")
+        print(response.text)
+        return None, None
+
+
+def encrypt(public_key: str, secret_value: str) -> str:
+    """Encrypt a Unicode string using the public key."""
+    public_key = public.PublicKey(public_key.encode("utf-8"), encoding.Base64Encoder())
+    sealed_box = public.SealedBox(public_key)
+    encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
+    return b64encode(encrypted).decode("utf-8")
+
 
 def trigger_workflow(organization, repository, workflow_name, event_type, aws_region, token, inputs=None):
     """
@@ -335,7 +397,7 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
             workflow_run_details = get_workflow_run_details(organization, repository, latest_run_id, token)
             if workflow_run_details is not None:
                 conclusion = workflow_run_details['conclusion']
-                print(f'Worflow status : {conclusion}')
+                print(f'Workflow status : {conclusion}')
 
                 if 'conclusion' in workflow_run_details:
                     failure_reason = print_step_logs(organization, repository, latest_run_id, token)
@@ -346,7 +408,8 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
             return None
     else:
         print(
-            f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, Content: {response.text}')
+            f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, '
+            f'Content: {response.text}')
         return None
 
     if fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key,
@@ -362,18 +425,18 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
 
 def run_infra(pat, stack_name):
     """
-    Retrieves values from different sources and finally triggers the function to run the github action
+    Retrieves values from different sources and finally triggers the function to run the GitHub action
 
             Parameters:
-                    pat (str): Personal Access token to trigger github action.
+                    pat (str): Personal Access token to trigger GitHub action.
                     stack_name (str): Name of the stack that manages Luminex infra resources.
-                    ENV: AWS_ACCESS_KEY_ID (str): AWS Temp Credentials: Access Key ID
-                    ENV: AWS_SECRET_ACCESS_KEY (str): AWS Temp Credentials: Secret Access Key
-                    ENV: AWS_SESSION_TOKEN (str): AWS Temp Credentials: Session Token
+                    ENV -  AWS_ACCESS_KEY_ID (str): AWS Temp Credentials: Access Key ID
+                    ENV -  AWS_SECRET_ACCESS_KEY (str): AWS Temp Credentials: Secret Access Key
+                    ENV - AWS_SESSION_TOKEN (str): AWS Temp Credentials: Session Token
 
             Returns:
-                    Calls the trigger workflow function with required parameters (From config file: organization_name, repository_name
-                    workflow_name, event_type, From user: personal_access_token, workflow_inputs)
+                    Calls the trigger workflow function with required parameters (From config file: organization_name,
+                    repository_name, workflow_name, event_type, From user: personal_access_token, workflow_inputs)
     """
     # Access AWS config
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
@@ -401,6 +464,12 @@ def run_infra(pat, stack_name):
         'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
         'AWS_SESSION_TOKEN': aws_session_token
     }
+
+    for secret_name, secret_value in workflow_inputs.items():
+        print(secret_name)
+        key_id, key = get_github_public_key(organization_name, repository_name, personal_access_token)
+        create_github_secret(key_id, key, organization_name, repository_name, personal_access_token,
+                             secret_name, secret_value)
 
     trigger_workflow(organization_name, repository_name, workflow_name, event_type, aws_region, personal_access_token,
                      workflow_inputs)

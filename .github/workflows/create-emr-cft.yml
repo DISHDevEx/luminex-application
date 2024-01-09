@@ -40,23 +40,22 @@ jobs:
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
-          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Install Boto3
         run: pip install boto3
       
       - name: Validate Stack
         env:
-          aws-access-key-id: ${{github.event.client_payload.inputs.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{github.event.client_payload.inputs.AWS_SECRET_ACCESS_KEY}}
-          aws-session-token: ${{github.event.client_payload.inputs.AWS_SESSION_TOKEN}}
-          aws-region: ${{github.event.inputs.AWS_Region || 'us-east-1'}}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
           stack-name: ${{github.event.client_payload.inputs.stack-name}}
         run: |
-          echo $stack-name
           python luminex/validation/stack_name_validator.py
       
       - name: Check if S3 bucket exists
@@ -64,10 +63,10 @@ jobs:
         run: |
           bucket_name=luminex-application-logs
           if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
-            echo "Bucket $bucket_name already exists."
+            echo "Bucket already exists."
             echo "::set-output name=bucket_exists::true"
           else
-            echo "Bucket $bucket_name does not exist."
+            echo "Bucket does not exist."
             echo "::set-output name=bucket_exists::false"
           fi
 
@@ -129,7 +128,7 @@ jobs:
             --cli-input-json "{\"Parameters\": $combined_params, \"Capabilities\": [\"CAPABILITY_IAM\", \"CAPABILITY_NAMED_IAM\", \"CAPABILITY_AUTO_EXPAND\"], \"RoleARN\": \"${{ secrets.CICD_CFT_ROLE }}\"}" \
           | jq -r '.StackId')
 
-          echo "CloudFormation stack ID: $stack_id"
+          echo "CloudFormation stack created"
 
           if [ -z "$stack_id" ]; then
             echo "Failed to deploy EMR cluster. Exiting..."
