@@ -1,11 +1,9 @@
 import os
-import subprocess
-import sys
 import boto3
 import time
+import requests
 
-from github import Github
-from github.GithubException import UnknownObjectException
+
 from validation import ETLFileValidator
 from validation import ETLS3Validator
 
@@ -16,28 +14,38 @@ from configs import Config
 cfg = Config('configs/config.yaml')
 
 
-def clone_private_repo(repo_url, local_repo_path, token):
+def clone_specific_files(repo_url, local_repo_path, token, subfolder, file_names):
     """
-    Clones the files needed to run the transformation, to local.
+    Clones specific files from a GitHub repository to a local path.
 
-            Parameters:
-                    repo_url (str): The path of the config file
-                    local_repo_path (str): The local path where the repo can be cloned to
-                    token (str): GitHub token to get access to the Repo
+    Parameters:
+        repo_url (str): The GitHub repository URL.
+        local_repo_path (str): The local path where the files should be saved.
+        token (str): GitHub token for authentication.
+        subfolder (str): Subfolder within the repository where the files are located.
+        file_names (list): Transformation files that needs to be cloned
 
-            Returns:
-                    local_repo_path (str): The local path where the repo has been cloned to
+    Returns:
+        local_repo_path (str): The local path where the files have been saved.
     """
     try:
-        g = Github(token, verify=False)
-        repo = g.get_repo(repo_url)
+        for file_name in file_names:
+            url = f'https://raw.githubusercontent.com/{repo_url}/main/{subfolder}/{file_name}.py'
+            response = requests.get(url, headers={'Authorization': f'token {token}'})
 
-        # Clone the private repository using SSH
-        ssh_url = repo.ssh_url
-        os.system(f"git clone {ssh_url} {local_repo_path}")
+            # Check if the request was successful (status code 200)
+            if response.status_code == 200:
+                # Save the content to a local file
+                local_file_path = os.path.join(local_repo_path, f"{file_name}.py")
+                os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+                with open(local_file_path, 'w') as file:
+                    file.write(response.text)
+                print(f"Cloned {file_name}.py to {local_file_path}")
+            else:
+                print(f"Error: {file_name}.py does not exist in the repository")
 
         return local_repo_path
-    except UnknownObjectException as e:
+    except Exception as e:
         print(f"Error: {e}")
         raise
 
@@ -137,8 +145,11 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
         try:
             github_repo_url = cfg.get('etl/transformation_folder_path')
 
+            transformation_subfolder = cfg.get('etl/transformation_subfolder')
+
             # Cloning the GitHub repository
-            local_repo_path = clone_private_repo(github_repo_url, "local_transformation_repo", github_token)
+            local_repo_path = clone_specific_files(github_repo_url, "local_transformation_repo", github_token,
+                                                   transformation_subfolder, transformation_names)
 
             s3_bucket_temp = cfg.get('etl/s3_bucket_temp', 'name-of-s3-temp-bucket')
 
@@ -147,7 +158,7 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
                               aws_session_token=aws_session_token, region_name=region_name, verify=False)
 
             # Upload files from the transformation folder based on user input
-            transformation_folder = os.path.join(local_repo_path, 'data-source/transformations')
+            transformation_folder = os.path.join(local_repo_path, transformation_subfolder)
             for name in transformation_names:
                 for root, dirs, files in os.walk(transformation_folder):
                     for file in files:
