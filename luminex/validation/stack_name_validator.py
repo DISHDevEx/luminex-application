@@ -35,8 +35,8 @@ if __name__ == "__main__":
 
     # AWS CloudFormation Stack Existence Check
     if stack_exists(input_stack_name):
-        print(f"Stack '{input_stack_name}' exists.")
+        print(f"Stack exists.")
         sys.exit(1)  # Exit with success status
     else:
-        print(f"Stack '{input_stack_name}' does not exist.")
+        print(f"Stack does not exist.")
         sys.exit(0)  # Exit with failure status
