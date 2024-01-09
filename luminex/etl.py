@@ -11,14 +11,6 @@ from validation import ETLS3Validator
 
 from configs import Config
 
-# # get repo root level
-# root_path = subprocess.run(
-#     ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
-# ).stdout.rstrip("\n")
-# # add repo path to use all libraries
-# sys.path.append(root_path)
-
-# from configs import Config
 
 # Declare Global Variable
 cfg = Config('configs/config.yaml')
