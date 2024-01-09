@@ -20,6 +20,7 @@ INFRA:
 ETL:
   S3_BUCKET_TEMP: luminex-application-files
   TRANSFORMATION_FOLDER_PATH: DISHDevEx/luminex-transformation
+  TRANSFORMATION_SUBFOLDER: data-source/transformations
 
 TEST:
   META:
