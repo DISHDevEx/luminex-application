@@ -401,7 +401,16 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
 
                 if 'conclusion' in workflow_run_details:
                     failure_reason = print_step_logs(organization, repository, latest_run_id, token)
-                    return failure_reason
+                    if failure_reason == "success":
+                        if fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key,
+                                                         aws_session_token):
+                            outputs = get_stack_outputs(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token)
+                            for key, value in outputs.items():
+                                print(f"Infra has been set.{key}: {value} ")
+                        else:
+                            print("Failed to create the stack.")
+
+                        return failure_reason
 
         else:
             print('Failed to retrieve the latest Workflow Run ID.')
@@ -411,16 +420,6 @@ def trigger_workflow(organization, repository, workflow_name, event_type, aws_re
             f'Failed to trigger the GitHub Actions workflow. Status code: {response.status_code}, '
             f'Content: {response.text}')
         return None
-
-    if fetch_stack_status_with_retry(stack_name, aws_region, aws_access_key_id, aws_secret_access_key,
-                                     aws_session_token):
-        outputs = get_stack_outputs(stack_name, aws_region, aws_access_key_id, aws_secret_access_key, aws_session_token)
-        for key, value in outputs.items():
-            print(f"Infra has been set.{key}: {value} ")
-    else:
-        print("Failed to create the stack.")
-
-    return None
 
 
 def run_infra(pat, stack_name):
@@ -459,17 +458,16 @@ def run_infra(pat, stack_name):
     personal_access_token = pat
 
     workflow_inputs = {
-        'stack-name': stack_name,
         'AWS_ACCESS_KEY_ID': aws_access_key_id,
         'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
         'AWS_SESSION_TOKEN': aws_session_token
     }
 
     for secret_name, secret_value in workflow_inputs.items():
-        print(secret_name)
         key_id, key = get_github_public_key(organization_name, repository_name, personal_access_token)
         create_github_secret(key_id, key, organization_name, repository_name, personal_access_token,
                              secret_name, secret_value)
 
+    workflow_inputs['stack-name'] = stack_name
     trigger_workflow(organization_name, repository_name, workflow_name, event_type, aws_region, personal_access_token,
                      workflow_inputs)
