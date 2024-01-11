@@ -1,0 +1,1 @@
+from .config_wrapper import load_cfg
