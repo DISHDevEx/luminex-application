@@ -1,49 +1,6 @@
 # Luminex Application
 
 
-~~~
-luminex_application-repo/
-|── .github
-│   │── workflows
-│   │   │── create-emr-cft.yml
-│   │   │── create-emr.yml
-│   │   │── pytest-pr-check.yaml
-├── configs
-│   ├── __init__.py
-│   ├── config.yaml
-│   └── config_wrapper.py
-├── infrastructure
-│   ├── config_parameter.json
-│   └── create-emr-cft.yml
-├── luminex
-│   ├── __init__.py
-│   ├── config_test.py
-│   ├── data_standardization
-│   │   ├── __init__.py
-│   │   ├── s3_data_loader.py
-│   │   ├── s3_data_loader_spark.py
-│   │   └── s3_json_uploader.py
-│   ├── kill_cluster.py
-│   ├── kill_infra.py
-│   ├── run_etl.py
-│   ├── run_infra.py
-│   └── validation
-│       ├── __init__.py
-│       ├── input_validator.py
-│       ├── rolename_permissions_validator.py
-│       ├── run_all_validations.py
-│       ├── stack_name_validator.py
-│       └── validate_multiple_files.py
-├── requirements.txt
-├── setup.py
-└── tests
-    ├── __init__.py
-    ├── conftest.py
-    ├── infra_tests.py
-    ├── test_add.py
-    └── test_s3_data_loader.py
-~~~
-
 ### __Installing luminex__ from PyPi (Latest Release):
 ```console
 pip install luminex

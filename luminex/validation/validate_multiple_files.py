@@ -1,4 +1,3 @@
-import json
 import requests
 import sys
 import urllib3
@@ -18,7 +17,7 @@ class ETLFileValidator:
             - pat (str): GitHub personal access token for authentication.
             - transformation_names (list): List of transformation file names.
         """
-        self.repo_name = cfg.get('etl/transformation_folder_path')
+        self.repo_name = cfg["ETL"]["TRANSFORMATION_FOLDER_PATH"]
         self.access_token = pat
         self.files_to_validate = [string + ".py" for string in transformation_names]
 

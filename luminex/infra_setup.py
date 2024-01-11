@@ -8,12 +8,14 @@ import binascii
 from base64 import b64encode
 from nacl import encoding, public
 import zipfile
+import logging
+
 from validation import IAMRoleValidator
-from configs import Config
+from configs import load_cfg
 
-
-# Declare Global Variable
-cfg = Config('configs/config.yaml')
+# declare global variable
+cfg = load_cfg()
+logger = logging.getLogger(__name__)
 
 
 def get_stack_outputs(stack_name, region, aws_access_key_id, aws_secret_access_key, aws_session_token):
@@ -450,11 +452,11 @@ def run_infra(pat, stack_name):
     permissions_validator = IAMRoleValidator(cfg)
     permissions_validator.validate_roles()
 
-    organization_name = cfg.get('infra/github_organization')
-    repository_name = cfg.get('infra/github_repository')
-    workflow_name = cfg.get('infra/github_workflow')
-    event_type = cfg.get('infra/github_event_type')
-    aws_region = cfg.get('aws/region')
+    organization_name = cfg["INFRA"]["GITHUB_ORGANIZATION"]
+    repository_name = cfg["INFRA"]["GITHUB_REPOSITORY"]
+    workflow_name = cfg["INFRA"]["GITHUB_WORKFLOW"]
+    event_type = cfg["INFRA"]["GITHUB_EVENT_TYPE"]
+    aws_region = cfg["AWS"]["REGION"]
     personal_access_token = pat
 
     workflow_inputs = {
