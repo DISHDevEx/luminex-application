@@ -1,5 +1,6 @@
 import json
 import requests
+import sys
 import urllib3
 from urllib.parse import quote
 
@@ -58,6 +59,7 @@ class ETLFileValidator:
             print(f'All given transformation files exist in Repo {self.repo_name}.')
         else:
             print(f'The following transformation files do not exist in Repo {self.repo_name}: {", ".join(missing_files)}.')
+            sys.exit(1)
 
         return missing_files
 

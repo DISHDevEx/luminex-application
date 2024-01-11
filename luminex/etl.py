@@ -133,14 +133,10 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
 
     # ETL Validations
     s3_validator = ETLS3Validator(source_path, destination_bucket)
-    if not s3_validator.run_validation():
-        print("S3 validation failed. Aborting.")
-        sys.exit(1)
+    s3_validator.run_validation()
 
     etl_file_validator = ETLFileValidator(cfg, pat, transformation_names)
-    if etl_file_validator.validate_files():
-        print("File validation failed. Aborting.")
-        sys.exit(1)
+    etl_file_validator.validate_files()
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id

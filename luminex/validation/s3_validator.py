@@ -27,7 +27,7 @@ class ETLS3Validator:
             print(f"{path_type} path is missing the bucket name.")
             return False
 
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3', verify=False)
 
         try:
             # Check if the specified S3 bucket exists
@@ -63,8 +63,9 @@ class ETLS3Validator:
         return bucket, key
 
     def run_validation(self):
-        # Run the input validation
-        if self.validate_input():
-            print("Source and Destination ETL Validation passed.")
-        else:
+    # Run the input validation
+        if not self.validate_input():
             print("Source and Destination Validation failed. Check the error messages for details.")
+            sys.exit(1)
+        else:
+            print("Source and Destination ETL Validation passed.")
