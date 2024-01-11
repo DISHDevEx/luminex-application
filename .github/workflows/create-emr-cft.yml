@@ -91,12 +91,12 @@ jobs:
               done
       - name: Grant execute permission to the bootstrap script
         run: |
-          chmod +x $GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
+          chmod +x $GITHUB_WORKSPACE/luminex/infrastructure/luminex-bootstrap.sh
 
       - name: Upload Bootstrap Script to S3
         run: |
           bucket_name=luminex-application-files
-          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-bootstrap.sh
+          source_file_path=$GITHUB_WORKSPACE/luminex/infrastructure/luminex-bootstrap.sh
           s3_key=bootstrap/luminex-bootstrap.sh
 
           aws s3 cp $source_file_path s3://$bucket_name/$s3_key
@@ -104,7 +104,7 @@ jobs:
       - name: Upload File to S3
         run: |
           bucket_name=luminex-application-files
-          source_file_path=$GITHUB_WORKSPACE/infrastructure/luminex-configurations.yaml
+          source_file_path=$GITHUB_WORKSPACE/luminex/infrastructure/luminex-configurations.yaml
           s3_key=configurations/luminex-configurations.yaml
 
           aws s3 cp $source_file_path s3://$bucket_name/$s3_key
@@ -112,7 +112,7 @@ jobs:
       - name: Deploy EMR cluster
         run: |
           set -e  # Add this line to exit on error
-          config_params=$(cat ./infrastructure/config_parameter.json)
+          config_params=$(cat ./luminex/infrastructure/config_parameter.json)
           sensitive_params="[
                 {\"ParameterKey\":\"EMRSubnetId\",\"ParameterValue\":\"${{ secrets.EMRSubnetId }}\"},
                 {\"ParameterKey\":\"SagemakerStudioSecurityGroupId\",\"ParameterValue\":\"${{ secrets.SagemakerStudioSecurityGroupId }}\"},
@@ -124,7 +124,7 @@ jobs:
 
           stack_id=$(aws cloudformation create-stack \
             --stack-name ${{ github.event.client_payload.inputs.stack-name }} \
-            --template-body file://./infrastructure/create-emr-cft.yml \
+            --template-body file://./luminex/infrastructure/create-emr-cft.yml \
             --cli-input-json "{\"Parameters\": $combined_params, \"Capabilities\": [\"CAPABILITY_IAM\", \"CAPABILITY_NAMED_IAM\", \"CAPABILITY_AUTO_EXPAND\"], \"RoleARN\": \"${{ secrets.CICD_CFT_ROLE }}\"}" \
           | jq -r '.StackId')
 
