@@ -1,13 +1,12 @@
 Release History
 ===============
 
-dev
----
 
-- \[Short description of non-trivial change.\]
-
-v0.0.1dev0 (2023-12-01)
+v0.0.1dev0 (12-01-2023)
 ------------------
-
 - Conception
 - Development
+
+v0.0.1 (11-01-2024)
+---
+- Code modularization and infra validations
