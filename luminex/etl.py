@@ -158,7 +158,7 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
                               aws_session_token=aws_session_token, region_name=region_name, verify=False)
 
             # Upload files from the transformation folder based on user input
-            transformation_folder = os.path.join(local_repo_path, transformation_subfolder)
+            transformation_folder = "local_transformation_repo"
             for name in transformation_names:
                 for root, dirs, files in os.walk(transformation_folder):
                     for file in files:
