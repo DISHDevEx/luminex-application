@@ -61,7 +61,7 @@ jobs:
       - name: Check if S3 bucket exists
         id: check_bucket
         run: |
-          bucket_name=luminex-application-logs
+          bucket_name=luminex-application-files
           if aws s3api head-bucket --bucket $bucket_name 2>/dev/null; then
             echo "Bucket already exists."
             echo "::set-output name=bucket_exists::true"
