@@ -1,3 +1,5 @@
+from .configs import load_cfg
+
 from .data_standardization import S3DataLoader
 from .data_standardization import S3DataUploader
 

@@ -2,16 +2,15 @@ import os
 import boto3
 import time
 import requests
-
+import logging
 
 from validation import ETLFileValidator
 from validation import ETLS3Validator
+from configs import load_cfg
 
-from configs import Config
-
-
-# Declare Global Variable
-cfg = Config('configs/config.yaml')
+# declare global variable
+cfg = load_cfg()
+logger = logging.getLogger(__name__)
 
 
 def clone_specific_files(repo_url, local_repo_path, token, subfolder, file_names):
@@ -138,20 +137,19 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
 
     local_repo_path = None
     emr_cluster_id = emr_cluster_id
-    # config = read_config('../config/etl_config.json')
     github_token = pat
-    region_name = cfg.get('aws/region', 'aws-region')
+    region_name = cfg["AWS"]["REGION"]
     if num_transformations == len(transformation_names):
         try:
-            github_repo_url = cfg.get('etl/transformation_folder_path')
+            github_repo_url = cfg["ETL"]["TRANSFORMATION_FOLDER_PATH"]
 
-            transformation_subfolder = cfg.get('etl/transformation_subfolder')
+            transformation_subfolder = cfg["ETL"]["TRANSFORMATION_SUBFOLDER"]
 
             # Cloning the GitHub repository
             local_repo_path = clone_specific_files(github_repo_url, "local_transformation_repo", github_token,
                                                    transformation_subfolder, transformation_names)
 
-            s3_bucket_temp = cfg.get('etl/s3_bucket_temp', 'name-of-s3-temp-bucket')
+            s3_bucket_temp = cfg["ETL"]["S3_BUCKET_TEMP"]
 
             # Initializing the S3 client
             s3 = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key,

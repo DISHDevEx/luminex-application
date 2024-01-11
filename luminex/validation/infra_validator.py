@@ -1,4 +1,3 @@
-import json
 import boto3
 from botocore.exceptions import ClientError
 import re
@@ -18,7 +17,7 @@ class IAMRoleValidator:
 
     def validate_roles(self):
         # Validate IAM roles based on the specified permissions in the configuration
-        permissions_config = self.config.get('validation/permissions', {})
+        permissions_config = self.config["VALIDATION"]["PERMISSIONS"]
 
         for role_name, required_permissions in permissions_config.items():
             if self.iam_role_exists(role_name):
