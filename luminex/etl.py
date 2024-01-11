@@ -1,5 +1,6 @@
 import os
 import boto3
+import sys
 import time
 import requests
 import logging
@@ -132,6 +133,7 @@ def run_etl(emr_cluster_id, pat, team_name, num_transformations, transformation_
     # ETL Validations
     s3_validator = ETLS3Validator(source_path, destination_bucket)
     s3_validator.run_validation()
+
     etl_file_validator = ETLFileValidator(cfg, pat, transformation_names)
     etl_file_validator.validate_files()
 
